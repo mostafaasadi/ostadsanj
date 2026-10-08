@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استادسنج — پیشخان</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    input, select, button { font-family: inherit; }
+
+    .db-page { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 60%, #a855f7 100%);
+      color: #fff; border-radius: 1.1rem; padding: 1.5rem 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 10px 30px -12px rgba(124, 58, 237, .5);
+    }
+    .hero h1 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .4rem 0; }
+    .hero p { margin: 0; opacity: .9; font-size: .87rem; line-height: 1.8; }
+    .hero-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .ghost-btn {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; border-radius: .7rem; padding: .55rem 1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: .45rem; text-decoration: none;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,.25); }
+
+    .card-x { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+    .card-x-head {
+      padding: .95rem 1.25rem; border-bottom: 1px solid var(--border, #e2e8f0);
+      display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+      font-weight: 800; font-size: .92rem; color: #1e293b;
+    }
+    .card-x-head i { color: #7c3aed; margin-left: .45rem; }
+    .card-x-body { padding: 1.25rem; }
+    .head-link { font-size: .75rem; color: #6d28d9; font-weight: 700; text-decoration: none; }
+    .head-link:hover { text-decoration: underline; }
+
+    .stepper { display: flex; align-items: center; gap: .75rem; flex-wrap: wrap; }
+    .step {
+      display: flex; align-items: center; gap: .7rem;
+      background: #f8fafc; border: 1px solid var(--border, #e2e8f0);
+      border-radius: .9rem; padding: .8rem 1rem; flex: 1; min-width: 150px;
+    }
+    .step-icon { width: 42px; height: 42px; border-radius: .8rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .step-info b { display: block; font-size: 1.15rem; font-weight: 800; color: #0f172a; }
+    .step-info span { font-size: .72rem; color: #64748b; }
+    .step-arrow { color: #c7cbd4; font-size: .9rem; }
+    @media (max-width: 900px) { .step-arrow { display: none; } }
+
+    .si-blue { background: #eff6ff; color: #2563eb; }
+    .si-green { background: #ecfdf5; color: #059669; }
+    .si-amber { background: #fffbeb; color: #d97706; }
+    .si-violet { background: #f5f3ff; color: #7c3aed; }
+    .si-red { background: #fef2f2; color: #dc2626; }
+    .si-slate { background: #f8fafc; color: #64748b; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: .9rem;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    }
+    .stat-icon { width: 46px; height: 46px; border-radius: .85rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .stat-value { font-size: 1.3rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .stat-label { font-size: .76rem; color: #64748b; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 36px; height: 36px; border-radius: .75rem; font-weight: 800; font-size: .8rem; flex-shrink: 0;
+    }
+    .rb-gold { background: #fef3c7; color: #92400e; }
+    .rb-silver { background: #e5e7eb; color: #374151; }
+    .rb-bronze { background: #fed7aa; color: #9a3412; }
+    .rb-plain { background: #f1f5f9; color: #64748b; font-size: .74rem; }
+
+    .top-row { display: flex; align-items: center; gap: .8rem; padding: .8rem 1.25rem; border-bottom: 1px solid #f1f5f9; text-decoration: none; color: inherit; transition: background .15s; }
+    .top-row:last-child { border-bottom: none; }
+    .top-row:hover { background: #f8fafc; }
+    .top-name { flex: 1; }
+    .top-name b { font-size: .88rem; color: #0f172a; display: block; }
+    .top-name small { font-size: .72rem; color: #94a3b8; }
+    .top-score { text-align: center; min-width: 54px; }
+    .top-score b { font-size: 1.05rem; font-weight: 800; display: block; }
+    .top-score small { font-size: .68rem; color: #94a3b8; }
+    .top-bar { width: 110px; }
+    .top-bar small { font-size: .68rem; color: #94a3b8; display: block; margin-top: .2rem; text-align: center; }
+    .sat-bar { background: #fee2e2; border-radius: 999px; height: 8px; overflow: hidden; }
+    .sat-fill { background: #10b981; height: 100%; border-radius: 999px; }
+
+    .msg-item { padding: .8rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; gap: .9rem; align-items: flex-start; }
+    .msg-item:last-child { border-bottom: none; }
+    .msg-item:hover { background: #f8fafc; }
+    .msg-item .date { font-size: .72rem; color: #94a3b8; white-space: nowrap; padding-top: .2rem; min-width: 88px; }
+    .msg-item .text { flex: 1; font-size: .85rem; line-height: 1.9; color: #1e293b; }
+
+    .badge-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .24rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .bp-green { background: #ecfdf5; color: #047857; } .bp-green .dot { background: #10b981; }
+    .bp-slate { background: #f1f5f9; color: #475569; } .bp-slate .dot { background: #94a3b8; }
+
+    .empty-state { padding: 2.5rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.2rem; margin-bottom: .8rem; display: block; color: #cbd5e1; }
+    .empty-state p { margin: 0; font-size: .88rem; line-height: 2; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script>
+    Chart.defaults.font.family = "Vazirmatn, sans-serif";
+    Chart.defaults.color = "#0f172a";
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    const content = layout.init("dashboard");
+    let monthlyChart = null;
+    let sentimentChart = null;
+
+    content.innerHTML = `
+      <div class="db-page">
+        <div class="hero">
+          <div>
+            <h1><i class="fas fa-chart-pie"></i> پیشخان استادسنج</h1>
+            <p>نمای کلی سامانه؛ از ورود پیام‌ها تا تطبیق، تحلیل و کارنامه اساتید</p>
+          </div>
+          <div class="hero-actions">
+            <a class="ghost-btn" href="import.html"><i class="fas fa-upload"></i> ایمپورت داده</a>
+            <a class="ghost-btn" href="analysis.html"><i class="fas fa-brain"></i> شروع تحلیل</a>
+            <a class="ghost-btn" href="professors.html"><i class="fas fa-trophy"></i> رتبه‌بندی</a>
+            <button class="ghost-btn" id="refreshBtn" title="به‌روزرسانی"><i class="fas fa-rotate"></i></button>
+          </div>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <div class="card-x">
+          <div class="card-x-head"><span><i class="fas fa-diagram-project"></i>خط لوله داده</span></div>
+          <div class="card-x-body">
+            <div class="stepper">
+              <div class="step"><div class="step-icon si-blue"><i class="fas fa-download"></i></div><div class="step-info"><b id="stepImport">-</b><span>پیام واردشده</span></div></div>
+              <div class="step-arrow"><i class="fas fa-arrow-left"></i></div>
+              <div class="step"><div class="step-icon si-amber"><i class="fas fa-link"></i></div><div class="step-info"><b id="stepMatch">-</b><span>تطبیق پیام-استاد</span></div></div>
+              <div class="step-arrow"><i class="fas fa-arrow-left"></i></div>
+              <div class="step"><div class="step-icon si-violet"><i class="fas fa-brain"></i></div><div class="step-info"><b id="stepAnalyzed">-</b><span>تحلیل ثبت‌شده</span></div></div>
+              <div class="step-arrow"><i class="fas fa-arrow-left"></i></div>
+              <div class="step"><div class="step-icon si-green"><i class="fas fa-award"></i></div><div class="step-info"><b id="stepCards">-</b><span>کارنامه معتبر</span></div></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon si-green"><i class="fas fa-users"></i></div><div><div class="stat-value" id="stAuthors">-</div><div class="stat-label">کاربران یکتا</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue"><i class="fas fa-user-graduate"></i></div><div><div class="stat-value" id="stProfessors">-</div><div class="stat-label">اساتید ثبت‌شده</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fas fa-hourglass-half"></i></div><div><div class="stat-value" id="stPending">-</div><div class="stat-label">در صف تحلیل</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-red"><i class="fas fa-triangle-exclamation"></i></div><div><div class="stat-value" id="stSerious">-</div><div class="stat-label">پیام‌های جدی</div></div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-chart-column"></i>پیام‌ها به تفکیک ماه (شمسی)</span></div>
+            <div class="card-x-body"><div style="height:260px;position:relative;"><canvas id="monthlyChart"></canvas></div></div>
+          </div>
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-chart-pie"></i>توزیع احساس نظرات</span></div>
+            <div class="card-x-body"><div style="height:260px;position:relative;"><canvas id="sentimentChart"></canvas></div></div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-trophy"></i>برترین اساتید</span><a class="head-link" href="professors.html">مشاهده همه</a></div>
+            <div id="topProfBox"></div>
+          </div>
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-clock-rotate-left"></i>آخرین پیام‌ها</span><a class="head-link" href="messages.html">مشاهده همه</a></div>
+            <div id="recentBox"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    const doughnutLabelsPlugin = {
+      id: "doughnutLabels",
+      afterDatasetsDraw(chart, args, opts) {
+        const fontSize = (opts && opts.fontSize) || 12;
+        const minPercent = (opts && opts.minPercent) || 3;
+        const meta = chart.getDatasetMeta(0);
+        const data = chart.data.datasets[0].data;
+        const total = data.reduce((a, b) => a + b, 0);
+        if (!total) return;
+        const { ctx } = chart;
+        meta.data.forEach((arc, i) => {
+          const pct = (data[i] / total) * 100;
+          if (pct < minPercent) return;
+          const p = arc.getProps(["x", "y", "startAngle", "endAngle", "outerRadius", "innerRadius"]);
+          const mid = (p.startAngle + p.endAngle) / 2;
+          const r = (p.outerRadius + p.innerRadius) / 2;
+          ctx.save();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `700 ${fontSize}px Vazirmatn, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(`${faNumber.format(Math.round(pct))}٪`, p.x + Math.cos(mid) * r, p.y + Math.sin(mid) * r);
+          ctx.restore();
+        });
+      }
+    };
+
+    function scoreColor(score) {
+      if (score === null || score === undefined) return "#94a3b8";
+      if (score >= 60) return "#059669";
+      if (score >= 30) return "#65a30d";
+      if (score >= 0) return "#d97706";
+      if (score >= -30) return "#ea580c";
+      return "#dc2626";
+    }
+
+    function scoreLabel(score) {
+      if (score === null || score === undefined) return "بدون داده";
+      if (score >= 60) return "عالی";
+      if (score >= 30) return "خوب";
+      if (score >= 0) return "متوسط";
+      if (score >= -30) return "ضعیف";
+      return "خیلی ضعیف";
+    }
+
+    async function loadAll() {
+      try {
+        const [ov, st, ranking, recent] = await Promise.all([
+          api.getOverview(),
+          api.getAnalysisStats(),
+          api.getProfessorsRanking(),
+          api.getRecentMessages(6)
+        ]);
+        renderPipeline(ov, st, ranking);
+        renderStats(ov, st);
+        renderMonthlyChart(ov.monthly_messages || []);
+        renderSentimentChart(st.sentiment_distribution || {});
+        renderTopProfessors(ranking.professors || []);
+        renderRecent(recent || []);
+      } catch (err) {
+        ui.showAlert("خطا در بارگذاری پیشخان: " + err.message, "danger");
+      }
+    }
+
+    function renderPipeline(ov, st, ranking) {
+      const cards = (ranking.professors || []).filter(p => p.has_enough_data).length;
+      document.getElementById("stepImport").textContent = faNumber.format(ov.counts.total_messages);
+      document.getElementById("stepMatch").textContent = faNumber.format(ov.counts.matched_message_professor_links);
+      document.getElementById("stepAnalyzed").textContent = faNumber.format(st.total_analyzed);
+      document.getElementById("stepCards").textContent = faNumber.format(cards);
+    }
+
+    function renderStats(ov, st) {
+      const serious = (st.severity_distribution || {});
+      document.getElementById("stAuthors").textContent = faNumber.format(ov.counts.unique_authors);
+      document.getElementById("stProfessors").textContent = faNumber.format(ov.counts.professors);
+      document.getElementById("stPending").textContent = faNumber.format(st.pending || 0);
+      document.getElementById("stSerious").textContent = faNumber.format((serious.medium || 0) + (serious.high || 0));
+    }
+
+    function renderMonthlyChart(monthly) {
+      const ctx = document.getElementById("monthlyChart");
+      if (monthlyChart) monthlyChart.destroy();
+      const rows = monthly || [];
+      if (!rows.length) {
+        const c = ctx.getContext("2d");
+        c.font = "14px Vazirmatn"; c.fillStyle = "#94a3b8"; c.textAlign = "center";
+        c.fillText("داده‌ای وجود ندارد", ctx.width / 2, ctx.height / 2);
+        return;
+      }
+      monthlyChart = new Chart(ctx, {
+        type: "bar",
+        data: {
+          labels: rows.map(m => m.month),
+          datasets: [{
+            data: rows.map(m => m.count),
+            backgroundColor: "rgba(124,58,237,.7)",
+            hoverBackgroundColor: "#6d28d9",
+            borderRadius: 6
+          }]
+        },
+        options: {
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              rtl: true, textDirection: "rtl",
+              callbacks: { label: c => ` ${faNumber.format(c.parsed.y)} پیام` }
+            }
+          },
+          scales: {
+            x: { ticks: { font: { family: "Vazirmatn", size: 10 }, maxRotation: 45, minRotation: 45 } },
+            y: { beginAtZero: true, ticks: { font: { family: "Vazirmatn", size: 10 }, callback: v => faNumber.format(v) } }
+          }
+        }
+      });
+    }
+
+    function renderSentimentChart(d) {
+      const ctx = document.getElementById("sentimentChart");
+      if (sentimentChart) sentimentChart.destroy();
+      const sd = [d.positive || 0, d.negative || 0, d.neutral || 0, d.mixed || 0];
+      const total = sd.reduce((a, b) => a + b, 0);
+      if (!total) {
+        const c = ctx.getContext("2d");
+        c.font = "14px Vazirmatn"; c.fillStyle = "#94a3b8"; c.textAlign = "center";
+        c.fillText("داده‌ای وجود ندارد", ctx.width / 2, ctx.height / 2);
+        return;
+      }
+      const opts = {
+        plugins: {
+          legend: {
+            position: "bottom",
+            labels: {
+              padding: 14,
+              font: { size: 12, family: "Vazirmatn" },
+              generateLabels: (chart) => {
+                const data = chart.data.datasets[0].data;
+                const t = data.reduce((a, b) => a + b, 0);
+                const meta = chart.getDatasetMeta(0);
+                return chart.data.labels.map((label, i) => {
+                  const style = meta.controller.getStyle(i);
+                  const pct = t ? Math.round((data[i] / t) * 100) : 0;
+                  return {
+                    text: `${label}: ${faNumber.format(pct)}٪ (${faNumber.format(data[i])})`,
+                    fillStyle: style.backgroundColor,
+                    strokeStyle: style.borderColor,
+                    lineWidth: style.borderWidth,
+                    hidden: !chart.getDataVisibility(i),
+                    index: i
+                  };
+                });
+              }
+            }
+          },
+          tooltip: { rtl: true, textDirection: "rtl" }
+        },
+        doughnutLabels: { fontSize: 12, minPercent: 3 }
+      };
+      sentimentChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["مثبت", "منفی", "خنثی", "مختلط"],
+          datasets: [{ data: sd, backgroundColor: ["#10b981", "#ef4444", "#94a3b8", "#f59e0b"], borderWidth: 2, borderColor: "#fff" }]
+        },
+        options: opts,
+        plugins: [doughnutLabelsPlugin]
+      });
+    }
+
+    function renderTopProfessors(profs) {
+      const box = document.getElementById("topProfBox");
+      const tops = profs.filter(p => p.has_enough_data && p.overall_score !== null && p.overall_score !== undefined).slice(0, 5);
+      if (!tops.length) {
+        box.innerHTML = '<div class="empty-state"><i class="fas fa-trophy"></i><p>هنوز کارنامه معتبری ثبت نشده است.</p></div>';
+        return;
+      }
+      box.innerHTML = tops.map((p, i) => {
+        const medal = i === 0 ? "rb-gold" : i === 1 ? "rb-silver" : i === 2 ? "rb-bronze" : "rb-plain";
+        const medalTxt = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : faNumber.format(i + 1);
+        const evalCount = p.message_count || 0;
+        const posRate = evalCount > 0 ? Math.round((p.positive_count / evalCount) * 100) : 0;
+        return `
+          <a class="top-row" href="professor-profile.html?id=${p.id}">
+            <span class="rank-badge ${medal}">${medalTxt}</span>
+            <span class="top-name"><b>${p.name}</b><small>${p.department || "بدون دپارتمان"}</small></span>
+            <span class="top-score"><b style="color:${scoreColor(p.overall_score)};">${faNumber.format(p.overall_score)}</b><small>${scoreLabel(p.overall_score)}</small></span>
+            <span class="top-bar">
+              <div class="sat-bar"><div class="sat-fill" style="width:${posRate}%;"></div></div>
+              <small>${faNumber.format(posRate)}٪ مثبت</small>
+            </span>
+          </a>`;
+      }).join("");
+    }
+
+    function renderRecent(rows) {
+      const box = document.getElementById("recentBox");
+      if (!rows.length) {
+        box.innerHTML = '<div class="empty-state"><i class="fas fa-message"></i><p>هنوز پیامی وارد نشده است.</p></div>';
+        return;
+      }
+      box.innerHTML = rows.map(m => `
+        <div class="msg-item">
+          <span class="date">${m.date || "-"}</span>
+          <span class="text">${m.text_preview}</span>
+          ${m.processed_llm
+            ? '<span class="badge-pill bp-green"><span class="dot"></span>تحلیل‌شده</span>'
+            : '<span class="badge-pill bp-slate"><span class="dot"></span>در صف</span>'}
+        </div>`).join("");
+    }
+
+    document.getElementById("refreshBtn").addEventListener("click", loadAll);
+    loadAll();
+  </script>
+</body>
+</html>

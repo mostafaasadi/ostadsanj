@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استادسنج — تحلیل هوشمند</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    input, select, button { font-family: inherit; }
+    .an-page { display: flex; flex-direction: column; gap: 1.25rem; }
+    .hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 60%, #a855f7 100%);
+      color: #fff; border-radius: 1.1rem; padding: 1.5rem 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 10px 30px -12px rgba(124, 58, 237, .5);
+    }
+    .hero h1 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .4rem 0; }
+    .hero p { margin: 0; opacity: .9; font-size: .85rem; line-height: 1.9; }
+    .hero-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .ghost-btn {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; border-radius: .7rem; padding: .55rem 1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,.25); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: .9rem;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    }
+    .stat-icon { width: 46px; height: 46px; border-radius: .85rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .si-blue { background: #eff6ff; color: #2563eb; }
+    .si-green { background: #ecfdf5; color: #059669; }
+    .si-red { background: #fef2f2; color: #dc2626; }
+    .si-amber { background: #fffbeb; color: #d97706; }
+    .si-violet { background: #f5f3ff; color: #7c3aed; }
+    .si-slate { background: #f8fafc; color: #64748b; }
+    .stat-value { font-size: 1.25rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .stat-label { font-size: .74rem; color: #64748b; }
+    .grid-2 { display: grid; grid-template-columns: 1.15fr 1fr; gap: 1.25rem; }
+    @media (max-width: 1000px) { .grid-2 { grid-template-columns: 1fr; } }
+    .card-x { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; overflow: hidden; }
+    .card-x-head {
+      padding: .95rem 1.25rem; border-bottom: 1px solid var(--border, #e2e8f0);
+      display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+      font-weight: 800; font-size: .92rem; color: #1e293b;
+    }
+    .card-x-head i { color: #7c3aed; margin-left: .45rem; }
+    .card-x-body { padding: 1.25rem; }
+    .ctrl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 1000px) { .ctrl-grid { grid-template-columns: 1fr; } }
+    .ctrl-col { display: flex; flex-direction: column; gap: 1rem; min-width: 0; }
+    .exec-row { margin-top: 1.2rem; border-top: 1px dashed #e2e8f0; padding-top: 1rem; justify-content: flex-end; }
+    .prov-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .8rem; }
+    .prov-card {
+      display: flex; align-items: center; gap: .8rem;
+      background: #fff; border: 2px solid var(--border, #e2e8f0); border-radius: .9rem;
+      padding: .8rem 1rem; cursor: pointer; transition: all .15s; text-align: right;
+    }
+    .prov-card:hover { border-color: #c7d2fe; }
+    .prov-card.active { border-color: #7c3aed; background: #f5f3ff; box-shadow: 0 4px 14px -6px rgba(124,58,237,.35); }
+    .prov-icon { width: 44px; height: 44px; border-radius: .8rem; display: flex; align-items: center; justify-content: center; font-size: 1.15rem; color: #fff; flex-shrink: 0; }
+    .pi-arvan { background: linear-gradient(135deg, #6d28d9, #a855f7); }
+    .pi-ollama { background: linear-gradient(135deg, #334155, #64748b); }
+    .prov-info b { display: block; font-size: .9rem; color: #0f172a; }
+    .prov-status { font-size: .72rem; font-weight: 700; display: inline-flex; align-items: center; gap: .35rem; }
+    .prov-status .dot { width: 7px; height: 7px; border-radius: 50%; }
+    .ps-ok { color: #047857; } .ps-ok .dot { background: #10b981; }
+    .ps-bad { color: #b91c1c; } .ps-bad .dot { background: #ef4444; }
+    .form-row { display: flex; flex-wrap: wrap; gap: .9rem; align-items: flex-end; }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field > label { font-size: .75rem; font-weight: 700; color: #64748b; }
+    .field .form-control { text-align: right; min-width: 110px; }
+    .field-grow { flex: 1; }
+    .check-line { display: flex; align-items: center; gap: .55rem; font-size: .85rem; font-weight: 600; color: #334155; }
+    .cost-panel { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: .9rem; padding: .9rem 1rem; }
+    .cost-panel-head { font-size: .78rem; font-weight: 800; color: #475569; display: flex; gap: .45rem; align-items: center; margin-bottom: .7rem; }
+    .cost-panel-head i { color: #d97706; }
+    .cost-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: .6rem; }
+    .cost-tile { background: #fff; border: 1px solid #e2e8f0; border-radius: .7rem; padding: .55rem .6rem; text-align: center; }
+    .cost-tile b { display: block; font-size: .92rem; color: #0f172a; margin-bottom: .1rem; }
+    .cost-tile span { font-size: .66rem; color: #64748b; line-height: 1.6; display: block; }
+    .cost-tile.accent { border-color: #ddd6fe; background: #f5f3ff; }
+    .cost-tile.accent b { color: #5b21b6; }
+    .cost-tile.free { border-color: #a7f3d0; background: #ecfdf5; }
+    .cost-tile.free b { color: #047857; }
+    .cost-note { margin-top: .6rem; font-size: .68rem; color: #94a3b8; line-height: 1.9; }
+    .mode-list { display: flex; flex-direction: column; gap: .5rem; }
+    .mode-item {
+      display: flex; gap: .7rem; align-items: center;
+      border: 1.5px solid #e2e8f0; border-radius: .8rem; padding: .6rem .8rem;
+      cursor: pointer; background: #fff; transition: all .15s;
+    }
+    .mode-item:hover { border-color: #c7d2fe; }
+    .mode-item.active { border-color: #7c3aed; background: #f5f3ff; }
+    .mode-item.danger.active { border-color: #dc2626; background: #fef2f2; }
+    .mode-title { font-size: .85rem; font-weight: 800; color: #1e293b; display: flex; gap: .45rem; align-items: center; }
+    .mode-title i { color: #7c3aed; font-size: .8rem; }
+    .mode-item.danger .mode-title i { color: #dc2626; }
+    .mode-desc { font-size: .72rem; color: #64748b; line-height: 1.7; margin-top: .15rem; display: block; }
+    .mode-ok { display: none; color: #7c3aed; font-size: 1.05rem; margin-right: auto; flex-shrink: 0; }
+    .mode-item.active .mode-ok { display: block; }
+    .mode-item.danger .mode-ok { color: #dc2626; }
+    .preview-panel { border: 1px solid #e2e8f0; border-radius: .9rem; background: #f8fafc; padding: .9rem 1rem; }
+    .preview-panel.danger { border-color: #fecaca; background: #fef2f2; }
+    .preview-head { display: flex; justify-content: space-between; align-items: center; font-size: .78rem; font-weight: 800; color: #475569; margin-bottom: .6rem; }
+    .preview-head span { display: flex; align-items: center; gap: .4rem; }
+    .preview-head i { color: #059669; }
+    .preview-panel.danger .preview-head i { color: #dc2626; }
+    .preview-refresh { border: none; background: none; cursor: pointer; color: #64748b; font-size: .74rem; font-weight: 700; display: inline-flex; align-items: center; gap: .3rem; }
+    .preview-refresh:hover { color: #4338ca; }
+    .preview-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: .6rem; }
+    .preview-item { background: #fff; border: 1px solid #e2e8f0; border-radius: .7rem; padding: .5rem .7rem; text-align: center; }
+    .preview-item b { display: block; font-size: .95rem; color: #0f172a; }
+    .preview-item span { font-size: .68rem; color: #64748b; }
+    .preview-item.cost b { color: #5b21b6; }
+    .preview-panel.danger .preview-item.cost b { color: #b91c1c; }
+    .preview-note { margin-top: .6rem; font-size: .72rem; color: #64748b; line-height: 1.8; }
+    .preview-panel.danger .preview-note { color: #991b1b; }
+    .ack-line { margin-top: .7rem; font-size: .78rem; font-weight: 700; color: #b91c1c; display: flex; gap: .5rem; align-items: center; }
+    .ack-line input { accent-color: #dc2626; }
+    .btn-x {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border-radius: .75rem; padding: .6rem 1.2rem;
+      font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .15s; border: 1px solid transparent;
+    }
+    .btn-x.sm { padding: .35rem .75rem; font-size: .76rem; border-radius: .65rem; }
+    .btn-primary-x { background: #4f46e5; color: #fff; box-shadow: 0 6px 16px -6px rgba(79,70,229,.5); }
+    .btn-primary-x:hover { background: #4338ca; }
+    .btn-danger-x { background: #dc2626; color: #fff; }
+    .btn-danger-x:hover { background: #b91c1c; }
+    .btn-outline-x { background: #fff; color: #334155; border-color: var(--border, #e2e8f0); }
+    .btn-outline-x:hover { background: #f8fafc; }
+    .btn-x:disabled { opacity: .5; cursor: not-allowed; }
+    .live-body { padding: .9rem 1.25rem; }
+    .live-top { display: flex; justify-content: space-between; align-items: center; gap: .8rem; flex-wrap: wrap; margin-bottom: .6rem; }
+    .live-title { font-weight: 800; font-size: .9rem; color: #1e293b; display: inline-flex; align-items: center; gap: .5rem; }
+    .live-title i { color: #7c3aed; }
+    .live-nums { font-size: .78rem; font-weight: 700; color: #475569; display: inline-flex; gap: .9rem; flex-wrap: wrap; }
+    .live-bar { background: #e2e8f0; border-radius: 999px; height: 12px; overflow: hidden; }
+    .live-fill { background: linear-gradient(90deg, #4f46e5, #a855f7); height: 100%; border-radius: 999px; transition: width .5s; width: 0%; }
+    .live-sub { margin-top: .45rem; font-size: .72rem; color: #64748b; display: flex; justify-content: space-between; gap: .6rem; flex-wrap: wrap; }
+    .chart-card { display: flex; flex-direction: column; }
+    .chart-body { flex: 1; min-height: 0; display: flex; flex-direction: column; }
+    .chart-box { flex: 1; min-height: 260px; position: relative; }
+    .sev-row { display: flex; gap: .5rem; flex-wrap: wrap; margin-top: .9rem; align-items: center; }
+    .sev-caption { font-size: .72rem; font-weight: 700; color: #64748b; display: inline-flex; align-items: center; gap: .35rem; }
+    .sev-caption i { color: #dc2626; font-size: .68rem; }
+    .badge-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .24rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .bp-green { background: #ecfdf5; color: #047857; } .bp-green .dot { background: #10b981; }
+    .bp-red { background: #fef2f2; color: #b91c1c; } .bp-red .dot { background: #ef4444; }
+    .bp-amber { background: #fffbeb; color: #b45309; } .bp-amber .dot { background: #f59e0b; }
+    .bp-slate { background: #f1f5f9; color: #475569; } .bp-slate .dot { background: #94a3b8; }
+    .bp-violet { background: #f5f3ff; color: #6d28d9; } .bp-violet .dot { background: #8b5cf6; }
+    table.job-table { width: 100%; border-collapse: separate; border-spacing: 0; direction: rtl; }
+    .job-table thead th { background: #f8fafc; color: #475569; font-size: .74rem; font-weight: 800; text-align: right; padding: .7rem .9rem; border-bottom: 1px solid var(--border, #e2e8f0); white-space: nowrap; }
+    .job-table tbody td { padding: .7rem .9rem; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle; font-size: .8rem; color: #1e293b; }
+    .job-table tbody tr:last-child td { border-bottom: none; }
+    .job-table td.detail { max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #64748b; font-size: .74rem; }
+    .prog { background: #e2e8f0; border-radius: 999px; height: 8px; min-width: 90px; overflow: hidden; }
+    .prog-fill { background: linear-gradient(90deg, #7c3aed, #a855f7); height: 100%; border-radius: 999px; transition: width .4s; }
+    .log-box {
+      max-height: 360px; overflow: auto; background: #0f172a; border-radius: .8rem; padding: .8rem 1rem;
+      direction: ltr; text-align: left;
+    }
+    .log-box .empty-state { direction: rtl; }
+    .log-line {
+      display: flex; gap: .6rem; font-size: .76rem; line-height: 2; color: #e2e8f0; align-items: baseline;
+      font-family: ui-monospace, Menlo, Consolas, "Vazirmatn", monospace;
+    }
+    .log-time { color: #64748b; flex-shrink: 0; font-size: .7rem; }
+    .log-tag { color: #94a3b8; flex-shrink: 0; font-size: .7rem; }
+    .lv-success { color: #34d399; font-weight: 700; }
+    .lv-error { color: #f87171; font-weight: 700; }
+    .lv-warn { color: #fbbf24; font-weight: 700; }
+    .lv-info { color: #93c5fd; font-weight: 700; }
+    .empty-state { padding: 2.5rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.2rem; margin-bottom: .8rem; display: block; color: #cbd5e1; }
+    .empty-state p { margin: 0; font-size: .88rem; line-height: 2; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script>
+    Chart.defaults.font.family = "Vazirmatn, sans-serif";
+    Chart.defaults.color = "#0f172a";
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    const content = layout.init("analysis");
+    let sentimentChart = null;
+    let modelsData = null;
+    let provider = "arvan";
+    let lastRunning = false;
+    let lastPending = 0;
+    let PREVIEW = null;
+    let mode = "queue";
+    const COST = { perMsg: null, perSum: null, inP: null, outP: null, free: false };
+
+    const JOB_FA = {
+      llm_analysis: "تحلیل پیام‌ها",
+      summaries_all: "بازتولید خلاصهٔ اساتید",
+      auto_review: "بازبینی خودکار ریپلای‌ها",
+      import: "ایمپورت پیام‌ها",
+      match: "تطبیق اساتید"
+    };
+    function jobFaName(name) { return JOB_FA[name] || name; }
+
+    const MODES = {
+      queue: {
+        title: "تحلیل صف فعلی", icon: "fa-play", danger: false, runs: true,
+        btn: "اجرای تحلیل صف",
+        desc: "فقط پیام‌های در انتظارِ صف تحلیل می‌شوند؛ هیچ دادهٔ موجودی حذف نمی‌شود."
+      },
+      opinions: {
+        title: "بازقضاوت نظرات", icon: "fa-rotate", danger: false, runs: true,
+        btn: "بازقضاوت و اجرای تحلیل",
+        desc: "تحلیلِ پیام‌های نظردار حذف و با پرامپت و گارد جدید دوباره قضاوت می‌شود؛ پیام‌های ردشده و بدون نظر دست نمی‌خورند."
+      },
+      failed: {
+        title: "برگشت پیام‌های خطادار", icon: "fa-hand", danger: false, runs: true,
+        btn: "برگشت خطادارها و اجرا",
+        desc: "پیام‌هایی که بر اثر خطا (تایم‌اوت/استثنا) بسته شده‌اند به صف برمی‌گردند و دوباره تحلیل می‌شوند."
+      },
+      auto_review: {
+        title: "تحلیل خودکار صف بازبینی", icon: "fa-robot", danger: false, runs: true,
+        btn: "تحلیل خودکار + بازبینی دستی",
+        desc: "پیام‌های در انتظار بازبینی با LLM تحلیل می‌شوند. موارد با اطمینان بالا خودکار پردازش می‌شوند؛ بقیه در صف بازبینی می‌مانند."
+      },
+      all: {
+        title: "ریست کامل و تحلیل از صفر", icon: "fa-trash", danger: true, runs: true,
+        btn: "ریست کامل و اجرای از صفر",
+        desc: "همه تحلیل‌ها و annotationها حذف می‌شوند و کل پیام‌های تطبیق‌خورده از صفر تحلیل می‌شوند؛ خلاصه همهٔ اساتید هم بازتولید می‌شود."
+      },
+      summaries: {
+        title: "فقط بازتولید خلاصهٔ اساتید", icon: "fa-file-pen", danger: false, runs: false,
+        btn: "بازتولید خلاصه‌ها",
+        desc: "بدون تحلیل هیچ پیامی؛ خلاصهٔ هوشمند اساتید دارای دادهٔ کافی با مدل انتخابی بازتولید می‌شود."
+      }
+    };
+
+    content.innerHTML = `
+      <div class="an-page">
+        <div class="hero">
+          <div>
+            <h1><i class="fas fa-brain"></i> تحلیل هوشمند</h1>
+            <p>استادسنج | انتخاب حالت عملیات، پیش‌نمایش هزینه و پایش فرآیندها</p>
+          </div>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <div class="card-x" id="liveCard" style="display:none;">
+          <div class="live-body">
+            <div class="live-top">
+              <span class="live-title"><i class="fas fa-spinner fa-spin"></i> <span id="liveName">فرآیند در حال اجرا…</span></span>
+              <span class="live-nums" id="liveNums"></span>
+              <button class="btn-x btn-danger-x sm" id="liveStop"><i class="fas fa-stop"></i> توقف فرآیند</button>
+            </div>
+            <div class="live-bar"><div class="live-fill" id="liveFill"></div></div>
+            <div class="live-sub" id="liveSub"></div>
+          </div>
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon si-violet"><i class="fas fa-chart-simple"></i></div><div><div class="stat-value" id="stAnalyzed">-</div><div class="stat-label">تحلیل‌شده</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fas fa-hourglass-half"></i></div><div><div class="stat-value" id="stPending">-</div><div class="stat-label">در صف</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fas fa-clipboard-check"></i></div><div><div class="stat-value" id="stPendingReview">-</div><div class="stat-label">در انتظار بازبینی</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green"><i class="fas fa-face-smile"></i></div><div><div class="stat-value" id="stPos">-</div><div class="stat-label">مثبت</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-red"><i class="fas fa-face-frown"></i></div><div><div class="stat-value" id="stNeg">-</div><div class="stat-label">منفی</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-slate"><i class="fas fa-face-meh"></i></div><div><div class="stat-value" id="stNeu">-</div><div class="stat-label">خنثی</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-blue"><i class="fas fa-face-flushed"></i></div><div><div class="stat-value" id="stMix">-</div><div class="stat-label">مختلط</div></div></div>
+        </div>
+
+        <div class="card-x">
+          <div class="card-x-head"><span><i class="fas fa-sliders"></i>حالت عملیات و اجرا</span></div>
+          <div class="card-x-body">
+            <div class="ctrl-grid">
+              <div class="ctrl-col">
+                <div class="prov-grid">
+                  <button class="prov-card active" id="provArvan" type="button">
+                    <div class="prov-icon pi-arvan"><i class="fas fa-cloud"></i></div>
+                    <div class="prov-info">
+                      <b>ArvanCloud</b>
+                      <span class="prov-status ps-ok" id="arvanStatus"><span class="dot"></span>در حال بررسی…</span>
+                    </div>
+                  </button>
+                  <button class="prov-card" id="provOllama" type="button">
+                    <div class="prov-icon pi-ollama"><i class="fas fa-robot"></i></div>
+                    <div class="prov-info">
+                      <b>Ollama محلی</b>
+                      <span class="prov-status ps-ok" id="ollamaStatus"><span class="dot"></span>در حال بررسی…</span>
+                    </div>
+                  </button>
+                </div>
+
+                <div class="form-row">
+                  <div class="field field-grow">
+                    <label>مدل</label>
+                    <select class="form-control" id="modelSel" style="width:100%;"></select>
+                  </div>
+                  <div class="field">
+                    <label>اندازه batch</label>
+                    <input type="number" class="form-control" id="batchInput" value="50" min="5" max="200">
+                  </div>
+                  <div class="field">
+                    <label>کارگرها</label>
+                    <input type="number" class="form-control" id="workersInput" value="4" min="1" max="8">
+                  </div>
+                </div>
+
+                <label class="check-line"><input type="checkbox" id="continuousChk" checked> اجرای پیوسته تا پایان صف</label>
+
+                <div class="cost-panel">
+                  <div class="cost-panel-head"><i class="fas fa-coins"></i> نرخ مدل انتخابی</div>
+                  <div class="cost-tiles" id="costTiles"></div>
+                  <div class="cost-note" id="costNote"></div>
+                </div>
+              </div>
+
+              <div class="ctrl-col">
+                <div class="mode-list" id="modeList"></div>
+                <div class="preview-panel" id="previewPanel"></div>
+              </div>
+            </div>
+
+            <div class="form-row exec-row">
+              <button class="btn-x btn-primary-x" id="execBtn"><i class="fas fa-play"></i> اجرای عملیات</button>
+              <button class="btn-x btn-danger-x" id="stopBtn"><i class="fas fa-stop"></i> توقف فرآیند جاری</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card-x chart-card">
+            <div class="card-x-head"><span><i class="fas fa-chart-pie"></i>توزیع احساس نظرات</span></div>
+            <div class="card-x-body chart-body">
+              <div class="chart-box"><canvas id="sentimentChart"></canvas></div>
+              <div class="sev-row" id="sevRow"></div>
+            </div>
+          </div>
+
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-list-check"></i>فرآیندها</span></div>
+            <div style="overflow-x:auto;" id="jobsBox"></div>
+          </div>
+        </div>
+
+        <div class="card-x">
+          <div class="card-x-head">
+            <span><i class="fas fa-terminal"></i>لاگ‌ها</span>
+            <span style="display:flex;gap:.4rem;">
+              <button class="btn-x btn-outline-x sm" id="logsRefresh"><i class="fas fa-rotate"></i> تازه‌سازی</button>
+              <button class="btn-x btn-outline-x sm" id="logsClear"><i class="fas fa-eraser"></i> پاک‌کردن</button>
+            </span>
+          </div>
+          <div class="card-x-body">
+            <div class="log-box" id="logBox"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    function toman(v) {
+      const n = Math.round(v * 100) / 100;
+      if (n < 100 && n % 1 !== 0) {
+        return n.toLocaleString("fa-IR", { maximumFractionDigits: 2 });
+      }
+      return Math.round(n).toLocaleString("fa-IR", { useGrouping: false });
+    }
+
+    function currentModelId() {
+      return document.getElementById("modelSel").value || null;
+    }
+
+    function selectedModelObj() {
+      if (!modelsData) return null;
+      const list = provider === "arvan" ? (modelsData.arvan_models || []) : (modelsData.ollama_models || []);
+      return list.find(m => m.id === currentModelId()) || null;
+    }
+
+    function setStatus(elId, ok) {
+      const el = document.getElementById(elId);
+      el.className = "prov-status " + (ok ? "ps-ok" : "ps-bad");
+      el.innerHTML = `<span class="dot"></span>${ok ? "در دسترس" : "قطع"}`;
+    }
+
+    async function loadModels() {
+      try {
+        modelsData = await api.get("/api/models");
+        setStatus("arvanStatus", modelsData.arvan_available);
+        setStatus("ollamaStatus", modelsData.ollama_available);
+        if (modelsData.default_provider) selectProvider(modelsData.default_provider, true);
+        else fillModels();
+      } catch (e) {
+        ui.showAlert("خطا در بارگذاری مدل‌ها: " + e.message, "danger");
+      }
+    }
+
+    function selectProvider(p, silent) {
+      provider = p;
+      document.getElementById("provArvan").classList.toggle("active", p === "arvan");
+      document.getElementById("provOllama").classList.toggle("active", p === "ollama");
+      fillModels();
+      if (!silent) loadCost();
+    }
+
+    function fillModels() {
+      const sel = document.getElementById("modelSel");
+      sel.innerHTML = "";
+      if (!modelsData) return;
+      const list = provider === "arvan" ? (modelsData.arvan_models || []) : (modelsData.ollama_models || []);
+      list.forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m.id;
+        opt.textContent = m.id;
+        sel.appendChild(opt);
+      });
+      loadCost();
+    }
+
+    async function loadCost() {
+      const tiles = document.getElementById("costTiles");
+      const note = document.getElementById("costNote");
+      let cp = null;
+      try { cp = await api.get("/api/analysis/cost-profile"); } catch (e) { }
+      const a = (cp && cp.analysis) || {}, s = (cp && cp.summary) || {};
+      const aSys = a.system_tokens || 0, aUser = a.avg_user_tokens || 0, aOut = a.avg_output_tokens || 0;
+      const sSys = s.system_tokens || 0, sUser = s.avg_user_tokens || 0, sOut = s.avg_output_tokens || 0;
+      const aIn = aSys + aUser, sIn = sSys + sUser;
+      const m = selectedModelObj();
+      if (provider === "ollama") {
+        COST.free = true; COST.perMsg = 0; COST.perSum = 0; COST.inP = 0; COST.outP = 0;
+        tiles.innerHTML = `<div class="cost-tile free"><b>رایگان</b><span>اجرای محلی Ollama — بدون هزینهٔ توکن</span></div>`;
+      } else if (m && m.input_per_1m !== null && m.input_per_1m !== undefined) {
+        COST.free = false;
+        COST.inP = m.input_per_1m; COST.outP = m.output_per_1m || 0;
+        COST.perMsg = aIn / 1e6 * COST.inP + aOut / 1e6 * COST.outP;
+        COST.perSum = sIn / 1e6 * COST.inP + sOut / 1e6 * COST.outP;
+        tiles.innerHTML = `
+          <div class="cost-tile"><b>${toman(COST.inP)}</b><span>تومان / M توکن ورودی</span></div>
+          <div class="cost-tile"><b>${toman(COST.outP)}</b><span>تومان / ۱M توکن خروجی</span></div>
+          <div class="cost-tile accent"><b>${toman(COST.perMsg)}</b><span>تومان ≈ هر پیام تحلیل</span></div>
+          <div class="cost-tile accent"><b>${toman(COST.perSum)}</b><span>تومان ≈ هر خلاصهٔ استاد</span></div>`;
+      } else {
+        COST.free = false; COST.inP = COST.outP = COST.perMsg = COST.perSum = null;
+        tiles.innerHTML = `<div class="cost-tile"><b>—</b><span>قیمت این مدل در دسترس نیست</span></div>`;
+      }
+      note.textContent = cp
+        ? `مبنای برآورد — توکن هر پیام: سیستم ${faNumber.format(aSys)} + ورودی ${faNumber.format(aUser)} + خروجی ${faNumber.format(aOut)} | توکن هر خلاصه: سیستم ${faNumber.format(sSys)} + ورودی ${faNumber.format(sUser)} + خروجی ${faNumber.format(sOut)}`
+        : "";
+      renderPreview();
+    }
+
+    function renderModeList() {
+      document.getElementById("modeList").innerHTML = Object.entries(MODES).map(([key, m]) => `
+        <div class="mode-item ${m.danger ? "danger" : ""} ${mode === key ? "active" : ""}" data-mode="${key}" role="button" tabindex="0">
+          <span style="flex:1;">
+            <span class="mode-title"><i class="fas ${m.icon}"></i>${m.title}</span>
+            <span class="mode-desc">${m.desc}</span>
+          </span>
+          <i class="fas fa-circle-check mode-ok"></i>
+        </div>`).join("");
+      document.querySelectorAll(".mode-item").forEach(el => {
+        const pick = () => {
+          mode = el.dataset.mode;
+          renderModeList();
+          renderPreview();
+        };
+        el.addEventListener("click", pick);
+        el.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            pick();
+          }
+        });
+      });
+    }
+
+    function costText(count, per) {
+      if (COST.free) return 0;
+      if (per === null || per === undefined) return null;
+      return count * per;
+    }
+
+    function renderPreview() {
+      const panel = document.getElementById("previewPanel");
+      const m = MODES[mode];
+      if (!PREVIEW) {
+        panel.className = "preview-panel";
+        panel.innerHTML = `<div class="preview-head"><span><i class="fas fa-circle-info"></i> پیش‌نمایش عملیات</span></div>
+          <div class="preview-note">پیش‌نمایش در حال بارگذاری…</div>`;
+        return;
+      }
+      let count = 0, extra = 0, note = "";
+      if (mode === "queue") { count = lastPending; note = "هیچ داده‌ای حذف نمی‌شود؛ فقط صف فعلی پردازش می‌شود."; }
+      if (mode === "opinions") { count = PREVIEW.opinions_messages; note = "تحلیل‌های بدون نظر و پیام‌های ردشده دست نمی‌خورند؛ خلاصه اساتید لمس‌شده در انتها بازتولید می‌شود."; }
+      if (mode === "failed") { count = PREVIEW.failed_messages; note = "فقط پیام‌هایی که بر اثر خطا بسته شده‌اند دوباره تحلیل می‌شوند."; }
+      if (mode === "auto_review") { count = PREVIEW.pending_review || 0; note = "پیام‌های در انتظار بازبینی با LLM تحلیل می‌شوند. موارد با اطمینان بالا خودکار پردازش می‌شوند؛ بقیه در صف بازبینی می‌مانند."; }
+      if (mode === "all") { count = PREVIEW.full_reanalysis_messages; extra = PREVIEW.professors_enough; note = "هشدار: همهٔ تحلیل‌های فعلی حذف می‌شوند و کل پیام‌ها از صفر تحلیل می‌شوند؛ خلاصهٔ همهٔ اساتید دارای دادهٔ کافی هم بازتولید می‌شود."; }
+      if (mode === "summaries") { count = PREVIEW.professors_enough; note = "هیچ پیامی تحلیل نمی‌شود؛ فقط خلاصهٔ هوشمند اساتید بازتولید می‌شود."; }
+
+      const per = mode === "summaries" ? COST.perSum : COST.perMsg;
+      let total = costText(count, per);
+      if (mode === "all" && total !== null && COST.perSum !== null) total += extra * COST.perSum;
+      const totalTxt = total === null ? "نامشخص" : (COST.free ? "رایگان (محلی)" : toman(total) + " تومان");
+
+      const items = [];
+      items.push(`<div class="preview-item"><b>${faNumber.format(count)}</b><span>${mode === "summaries" ? "استاد برای بازتولید خلاصه" : "پیام تحت تأثیر"}</span></div>`);
+      if (mode === "all") items.push(`<div class="preview-item"><b>${faNumber.format(extra)}</b><span>خلاصهٔ استاد بازتولید می‌شود</span></div>`);
+      items.push(`<div class="preview-item cost"><b>${totalTxt}</b><span>هزینهٔ تقریبی عملیات</span></div>`);
+
+      const ack = m.danger ? `
+        <label class="ack-line"><input type="checkbox" id="ackChk"> می‌دانم همهٔ تحلیل‌های فعلی حذف می‌شود و این عملیات برگشت‌پذیر نیست.</label>` : "";
+
+      panel.className = "preview-panel" + (m.danger ? " danger" : "");
+      panel.innerHTML = `
+        <div class="preview-head">
+          <span><i class="fas ${m.danger ? "fa-triangle-exclamation" : "fa-circle-info"}"></i> پیش‌نمایش: ${m.title}</span>
+          <button class="preview-refresh" id="pvRefresh"><i class="fas fa-rotate"></i> به‌روزرسانی اعداد</button>
+        </div>
+        <div class="preview-grid">${items.join("")}</div>
+        <div class="preview-note">${note}</div>
+        ${ack}`;
+      document.getElementById("pvRefresh").addEventListener("click", loadPreview);
+      if (m.danger) {
+        const ackEl = document.getElementById("ackChk");
+        ackEl.addEventListener("change", syncExecBtn);
+      }
+      syncExecBtn();
+    }
+
+    function syncExecBtn() {
+      const btn = document.getElementById("execBtn");
+      const m = MODES[mode];
+      btn.innerHTML = `<i class="fas ${m.danger ? "fa-trash" : "fa-play"}"></i> ${m.btn}`;
+      btn.className = "btn-x " + (m.danger ? "btn-danger-x" : "btn-primary-x");
+      const ackEl = document.getElementById("ackChk");
+      btn.disabled = !!(m.danger && ackEl && !ackEl.checked);
+    }
+
+    async function loadPreview() {
+      try {
+        PREVIEW = await api.get("/api/analysis/maintenance-preview");
+      } catch (e) {
+        PREVIEW = null;
+      }
+      renderPreview();
+    }
+
+    async function loadPendingReviewCount() {
+      try {
+        const res = await api.get("/api/matches/pending-count");
+        document.getElementById("stPendingReview").textContent = faNumber.format(res.count || 0);
+        if (PREVIEW) {
+          PREVIEW.pending_review = res.count || 0;
+          renderPreview();
+        }
+      } catch (e) {
+        document.getElementById("stPendingReview").textContent = "-";
+      }
+    }
+
+    async function loadStats() {
+      try {
+        const s = await api.get("/api/analysis/stats");
+        document.getElementById("stAnalyzed").textContent = faNumber.format(s.total_analyzed);
+        document.getElementById("stPending").textContent = faNumber.format(s.pending);
+        lastPending = s.pending || 0;
+        const sd = s.sentiment_distribution || {};
+        document.getElementById("stPos").textContent = faNumber.format(sd.positive || 0);
+        document.getElementById("stNeg").textContent = faNumber.format(sd.negative || 0);
+        document.getElementById("stNeu").textContent = faNumber.format(sd.neutral || 0);
+        document.getElementById("stMix").textContent = faNumber.format(sd.mixed || 0);
+        renderSentiment(sd, s.severity_distribution || {});
+        renderPreview();
+      } catch (e) { }
+    }
+
+    function renderSentiment(sd, sev) {
+      const ctx = document.getElementById("sentimentChart").getContext("2d");
+      if (sentimentChart) sentimentChart.destroy();
+      const colors = ["#10b981", "#ef4444", "#94a3b8", "#f59e0b"];
+      sentimentChart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["مثبت", "منفی", "خنثی", "مختلط"],
+          datasets: [{ data: [sd.positive || 0, sd.negative || 0, sd.neutral || 0, sd.mixed || 0], backgroundColor: colors, borderWidth: 2, borderColor: "#fff" }]
+        },
+        options: {
+          plugins: {
+            legend: {
+              position: "bottom",
+              labels: {
+                padding: 14,
+                font: { family: "Vazirmatn", size: 12 },
+                generateLabels: (chart) => {
+                  const data = chart.data.datasets[0].data;
+                  return chart.data.labels.map((lb, i) => ({
+                    text: `${lb}: ${faNumber.format(data[i])}`,
+                    fillStyle: colors[i],
+                    strokeStyle: "#fff",
+                    lineWidth: 2,
+                    hidden: !chart.getDataVisibility(i),
+                    index: i
+                  }));
+                }
+              }
+            },
+            tooltip: {
+              rtl: true,
+              textDirection: "rtl",
+              titleFont: { family: "Vazirmatn", size: 12 },
+              bodyFont: { family: "Vazirmatn", size: 12 },
+              callbacks: { label: (c) => ` ${c.label}: ${faNumber.format(c.parsed)} نظر` }
+            }
+          }
+        }
+      });
+      document.getElementById("sevRow").innerHTML = `
+        <span class="sev-caption"><i class="fas fa-flag"></i> موارد جدی علامت‌خورده:</span>
+        <span class="badge-pill bp-slate"><span class="dot"></span>کم: ${faNumber.format(sev.low || 0)}</span>
+        <span class="badge-pill bp-amber"><span class="dot"></span>متوسط: ${faNumber.format(sev.medium || 0)}</span>
+        <span class="badge-pill bp-red"><span class="dot"></span>بالا: ${faNumber.format(sev.high || 0)}</span>
+        <span class="badge-pill bp-green"><span class="dot"></span>بدون مورد جدی: ${faNumber.format(sev.none || 0)}</span>
+      `;
+    }
+
+    function parseJobNums(errStr) {
+      const out = { ok: 0, err: 0, skip: 0, sum: 0, auto_ok: 0, auto_no: 0, manual: 0 };
+      if (!errStr) return out;
+      const mOk = errStr.match(/ok:(\d+)/);
+      const mErr = errStr.match(/err:(\d+)/);
+      const mSkip = errStr.match(/skip:(\d+)/);
+      const mSum = errStr.match(/summaries:(\d+)/);
+      const mAutoOk = errStr.match(/auto_ok:(\d+)/);
+      const mAutoNo = errStr.match(/auto_no:(\d+)/);
+      const mManual = errStr.match(/manual:(\d+)/);
+      if (mOk) out.ok = parseInt(mOk[1]);
+      if (mErr) out.err = parseInt(mErr[1]);
+      if (mSkip) out.skip = parseInt(mSkip[1]);
+      if (mSum) out.sum = parseInt(mSum[1]);
+      if (mAutoOk) out.auto_ok = parseInt(mAutoOk[1]);
+      if (mAutoNo) out.auto_no = parseInt(mAutoNo[1]);
+      if (mManual) out.manual = parseInt(mManual[1]);
+      return out;
+    }
+
+    function renderLive(job) {
+      const card = document.getElementById("liveCard");
+      if (!job) {
+        card.style.display = "none";
+        return;
+      }
+      card.style.display = "";
+      const pct = job.total ? Math.min(100, Math.round((job.done || 0) * 100 / job.total)) : 0;
+      const nums = parseJobNums(job.error);
+      document.getElementById("liveName").textContent =
+        job.status === "pending"
+          ? `فرآیند شمارهٔ ${faNumber.format(job.id)} در انتظار شروع — ${jobFaName(job.name)}`
+          : `فرآیند شماره ${faNumber.format(job.id)} در حال اجرا — ${jobFaName(job.name)}`;
+      document.getElementById("liveFill").style.width = pct + "%";
+      document.getElementById("liveNums").innerHTML = `
+        <span>پیشرفت: ${faNumber.format(pct)}٪</span>
+        <span>${faNumber.format(job.done || 0)} از ${faNumber.format(job.total || 0)}</span>`;
+      const plain = (job.error && !/ok:\d/.test(job.error) && !/auto_ok:\d/.test(job.error)) ? job.error : "";
+      let statsText = `تحلیل‌شده: ${faNumber.format(nums.ok)} | خطا: ${faNumber.format(nums.err)} | ردشده: ${faNumber.format(nums.skip)}`;
+      if (nums.auto_ok || nums.auto_no || nums.manual) {
+        statsText = `خودکار تأیید: ${faNumber.format(nums.auto_ok)} | خودکار رد: ${faNumber.format(nums.auto_no)} | باقی‌مانده دستی: ${faNumber.format(nums.manual)}`;
+      }
+      if (nums.sum) statsText += ` | خلاصه: ${faNumber.format(nums.sum)}`;
+      document.getElementById("liveSub").innerHTML = `
+        <span>${statsText}</span>
+        <span style="color: ${job.status === 'error' ? '#dc2626' : '#64748b'}; font-weight: ${job.status === 'error' ? '700' : '400'};">${plain}</span>`;
+    }
+
+    function jobStatusBadge(st) {
+      if (st === "running") return '<span class="badge-pill bp-violet"><span class="dot"></span>در حال اجرا</span>';
+      if (st === "done") return '<span class="badge-pill bp-green"><span class="dot"></span>تمام</span>';
+      if (st === "error") return '<span class="badge-pill bp-red"><span class="dot"></span>خطا</span>';
+      if (st === "cancelled") return '<span class="badge-pill bp-amber"><span class="dot"></span>متوقف</span>';
+      return '<span class="badge-pill bp-slate"><span class="dot"></span>در انتظار</span>';
+    }
+
+    async function loadJobs() {
+      try {
+        const jobs = await api.get("/api/jobs");
+        const running = jobs.some(j => j.status === "running" || j.status === "pending");
+        if (lastRunning && !running) {
+          loadStats();
+          loadLogs();
+          loadPreview();
+          loadPendingReviewCount();
+        }
+        lastRunning = running;
+        renderLive(jobs.find(j => j.status === "running" || j.status === "pending") || null);
+        const box = document.getElementById("jobsBox");
+        if (!jobs.length) {
+          box.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>هنوز فرآیندی ثبت نشده است.</p></div>';
+          return;
+        }
+        box.innerHTML = `
+          <table class="job-table">
+            <thead><tr><th style="width:40px;">#</th><th>نام</th><th style="width:100px;">وضعیت</th><th style="width:150px;">پیشرفت</th><th>جزئیات</th><th style="width:60px;"></th></tr></thead>
+            <tbody>
+              ${jobs.map(j => {
+                const pct = j.total ? Math.min(100, Math.round((j.done || 0) * 100 / j.total)) : 0;
+                return `
+                <tr>
+                  <td>${faNumber.format(j.id)}</td>
+                  <td style="font-weight:700;">${jobFaName(j.name)}</td>
+                  <td>${jobStatusBadge(j.status)}</td>
+                  <td>
+                    <div class="prog"><div class="prog-fill" style="width:${pct}%;"></div></div>
+                    <div style="font-size:.68rem;color:#94a3b8;margin-top:.2rem;">${faNumber.format(j.done || 0)} از ${faNumber.format(j.total || 0)}</div>
+                  </td>
+                  <td class="detail" title="${(j.error || "").replace(/"/g, "'")}">${j.error || "-"}</td>
+                  <td>${(j.status === "running" || j.status === "pending") ? `<button class="btn-x btn-outline-x sm" onclick="cancelJob(${j.id})"><i class="fas fa-stop"></i></button>` : ""}</td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>`;
+      } catch (e) { }
+    }
+
+    window.cancelJob = async function(id) {
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/${id}`, { method: "DELETE" });
+        if (!res.ok) throw new Error("http " + res.status);
+        ui.showAlert("فرآیند لغو شد.", "success");
+        loadJobs();
+      } catch (e) {
+        ui.showAlert("خطا در لغو فرآیند: " + e.message, "danger");
+      }
+    };
+
+    async function loadLogs() {
+      try {
+        const data = await api.get("/api/analysis/logs?limit=120");
+        const box = document.getElementById("logBox");
+        const logs = data.logs || [];
+        if (!logs.length) {
+          box.innerHTML = '<div class="empty-state"><p>لاگی ثبت نشده است.</p></div>';
+          return;
+        }
+        box.innerHTML = logs.map(l => `
+          <div class="log-line">
+            <span class="log-time">${l.ts || ""}</span>
+            <span class="lv-${l.level || "info"}">[${l.level || "info"}]</span>
+            <span class="log-tag">${l.tag || ""}</span>
+            <span>${l.message || l.msg || ""}</span>
+          </div>`).join("");
+      } catch (e) { }
+    }
+
+    async function postReset(resetMode) {
+      const res = await fetch(`${API_BASE}/api/analysis/reset`, {
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mode: resetMode })
+      });
+      return res.json();
+    }
+
+    async function runAnalysis() {
+      const payload = {
+        batch_size: parseInt(document.getElementById("batchInput").value) || 50,
+        continuous: document.getElementById("continuousChk").checked,
+        workers: parseInt(document.getElementById("workersInput").value) || 3,
+        provider: provider,
+        model: currentModelId()
+      };
+      const res = await api.post("/api/analysis/run", payload);
+      return res;
+    }
+
+    async function regenAllSummaries() {
+      const url = `${API_BASE}/api/summaries/regenerate-all?provider=${provider}${currentModelId() ? "&model=" + encodeURIComponent(currentModelId()) : ""}`;
+      const res = await fetch(url, { method: "POST" }).then(r => r.json());
+      return res;
+    }
+
+    async function executeMode() {
+      const btn = document.getElementById("execBtn");
+      btn.disabled = true;
+      try {
+        if (mode === "summaries") {
+          const res = await regenAllSummaries();
+          ui.showAlert(`بازتولید خلاصه‌ها شروع شد (${faNumber.format(res.total || 0)} استاد، فرآیند شمارهٔ ${faNumber.format(res.job_id)}).`, "success");
+        } else if (mode === "auto_review") {
+          const url = `${API_BASE}/api/matches/auto-review?provider=${provider}${currentModelId() ? "&model=" + encodeURIComponent(currentModelId()) : ""}`;
+          const res = await fetch(url, { method: "POST" }).then(r => r.json());
+          ui.showAlert(`تحلیل خودکار شروع شد (فرآیند شمارهٔ ${faNumber.format(res.job_id)}). موارد با اطمینان بالا خودکار پردازش می‌شوند؛ بقیه در صف بازبینی می‌مانند.`, "success");
+        } else {
+          if (mode === "opinions") await postReset("opinions");
+          if (mode === "failed") await postReset("failed");
+          if (mode === "all") await postReset("all");
+          const res = await runAnalysis();
+          ui.showAlert(`عملیات «${MODES[mode].title}» شروع شد (فرآیند شمارهٔ ${faNumber.format(res.job_id)}).`, "success");
+        }
+        loadJobs();
+        loadStats();
+        loadPreview();
+        loadPendingReviewCount();
+      } catch (e) {
+        ui.showAlert("خطا در اجرای عملیات: " + e.message, "danger");
+      }
+      syncExecBtn();
+    }
+
+    async function stopRunning() {
+      try {
+        const res = await fetch(`${API_BASE}/api/jobs/cancel-running`, { method: "DELETE" });
+        const data = await res.json();
+        ui.showAlert(data.message || "توقف انجام شد.", "success");
+        loadJobs();
+      } catch (e) {
+        ui.showAlert("خطا در توقف: " + e.message, "danger");
+      }
+    }
+
+    document.getElementById("provArvan").addEventListener("click", () => selectProvider("arvan"));
+    document.getElementById("provOllama").addEventListener("click", () => selectProvider("ollama"));
+    document.getElementById("modelSel").addEventListener("change", loadCost);
+    document.getElementById("execBtn").addEventListener("click", executeMode);
+    document.getElementById("stopBtn").addEventListener("click", stopRunning);
+    document.getElementById("liveStop").addEventListener("click", stopRunning);
+    document.getElementById("logsRefresh").addEventListener("click", loadLogs);
+    document.getElementById("logsClear").addEventListener("click", async () => {
+      await fetch(`${API_BASE}/api/analysis/logs`, { method: "DELETE" });
+      loadLogs();
+    });
+
+    setInterval(loadJobs, 3000);
+
+    renderModeList();
+    renderPreview();
+    loadModels();
+    loadStats();
+    loadPreview();
+    loadPendingReviewCount();
+    loadJobs();
+    loadLogs();
+  </script>
+</body>
+</html>

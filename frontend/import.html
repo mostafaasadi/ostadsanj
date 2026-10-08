@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استادسنج — ایمپورت پیام‌ها</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <style>
+    input, select, button, textarea { font-family: inherit; }
+
+    .im-page { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 60%, #a855f7 100%);
+      color: #fff; border-radius: 1.1rem; padding: 1.5rem 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 10px 30px -12px rgba(124, 58, 237, .5);
+    }
+    .hero h1 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .4rem 0; }
+    .hero p { margin: 0; opacity: .9; font-size: .87rem; line-height: 1.8; }
+    .hero-chip {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; border-radius: .7rem; padding: .5rem .9rem;
+      font-size: .78rem; font-weight: 600;
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+
+    .card-x { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; overflow: hidden; box-shadow: 0 1px 2px rgba(15,23,42,.04); }
+    .card-x-head {
+      padding: .95rem 1.25rem; border-bottom: 1px solid var(--border, #e2e8f0);
+      display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+      font-weight: 800; font-size: .92rem; color: #1e293b;
+    }
+    .card-x-head i { color: #7c3aed; margin-left: .45rem; }
+    .card-x-body { padding: 1.25rem; }
+
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: .9rem;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    }
+    .stat-icon { width: 46px; height: 46px; border-radius: .85rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .si-blue { background: #eff6ff; color: #2563eb; }
+    .si-violet { background: #f5f3ff; color: #7c3aed; }
+    .si-green { background: #ecfdf5; color: #059669; }
+    .si-amber { background: #fffbeb; color: #d97706; }
+    .stat-value { font-size: 1.3rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .stat-label { font-size: .76rem; color: #64748b; }
+
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+
+    .add-grid { display: grid; grid-template-columns: 1fr 1.25fr; gap: 1.25rem; }
+    @media (max-width: 900px) { .add-grid { grid-template-columns: 1fr; } }
+
+    .field { display: flex; flex-direction: column; gap: .4rem; margin-bottom: .9rem; }
+    .field > label { font-size: .75rem; font-weight: 700; color: #64748b; }
+    .field .form-control { text-align: right; }
+    textarea.form-control { resize: vertical; min-height: 130px; line-height: 2; }
+    .form-note { font-size: .76rem; color: #94a3b8; line-height: 1.9; margin-top: .7rem; }
+
+    .preview-label { font-size: .78rem; font-weight: 800; color: #475569; margin-bottom: .5rem; display: flex; align-items: center; gap: .45rem; }
+    .preview-label i { color: #7c3aed; }
+    .preview-box {
+      background: #f8fafc; border: 1px solid var(--border, #e2e8f0); border-radius: .8rem;
+      padding: .9rem; max-height: 360px; overflow-y: auto;
+    }
+    .alias-row { border: 1px dashed #c7cbd4; border-radius: .8rem; padding: .7rem .9rem; margin-bottom: .6rem; background: #fff; }
+    .alias-row:last-child { margin-bottom: 0; }
+    .alias-name { font-weight: 800; font-size: .85rem; color: #1e293b; margin-bottom: .45rem; display: flex; align-items: center; gap: .4rem; }
+    .alias-name i { color: #7c3aed; font-size: .8rem; }
+    .alias-chips { display: flex; flex-wrap: wrap; gap: .35rem; }
+    .alias-chip { background: #eff6ff; color: #1d4ed8; border-radius: 999px; padding: .18rem .6rem; font-size: .72rem; font-weight: 600; }
+    .alias-chip.more { background: #f1f5f9; color: #64748b; }
+
+    .btn-x {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border-radius: .75rem; padding: .62rem 1.3rem;
+      font-size: .86rem; font-weight: 700; cursor: pointer; transition: all .15s; border: 1px solid transparent;
+    }
+    .btn-primary-x { background: #4f46e5; color: #fff; box-shadow: 0 6px 16px -6px rgba(79,70,229,.5); }
+    .btn-primary-x:hover { background: #4338ca; }
+    .btn-success-x { background: #059669; color: #fff; box-shadow: 0 6px 16px -6px rgba(5,150,105,.5); }
+    .btn-success-x:hover { background: #047857; }
+    .btn-outline-x { background: #fff; color: #334155; border-color: var(--border, #e2e8f0); }
+    .btn-outline-x:hover { background: #f8fafc; }
+    .btn-block { width: 100%; justify-content: center; }
+
+    .switch { position: relative; width: 46px; height: 25px; flex-shrink: 0; }
+    .switch input { display: none; }
+    .slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 999px; transition: .2s; cursor: pointer; }
+    .slider::before { content: ""; position: absolute; width: 19px; height: 19px; border-radius: 50%; background: #fff; top: 3px; right: 3px; transition: .2s; box-shadow: 0 1px 3px rgba(0,0,0,.25); }
+    .switch input:checked + .slider { background: #4f46e5; }
+    .switch input:checked + .slider::before { transform: translateX(-21px); }
+    .switch-line { display: flex; align-items: center; gap: .7rem; margin-bottom: .9rem; }
+    .switch-line span { font-size: .83rem; font-weight: 700; color: #334155; }
+
+    .match-desc { font-size: .85rem; color: #64748b; line-height: 2; margin: 0 0 1rem 0; }
+
+    .badge-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .24rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .bp-green { background: #ecfdf5; color: #047857; } .bp-green .dot { background: #10b981; }
+    .bp-red { background: #fef2f2; color: #b91c1c; } .bp-red .dot { background: #ef4444; }
+    .bp-blue { background: #eff6ff; color: #1d4ed8; } .bp-blue .dot { background: #3b82f6; }
+    .bp-amber { background: #fffbeb; color: #b45309; } .bp-amber .dot { background: #f59e0b; }
+    .bp-slate { background: #f1f5f9; color: #475569; } .bp-slate .dot { background: #94a3b8; }
+    .pulse-dot { width: 7px; height: 7px; border-radius: 50%; background: #3b82f6; animation: pulse 1.2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+
+    .progress-track { background: #e2e8f0; border-radius: 999px; height: 8px; overflow: hidden; min-width: 120px; }
+    .progress-fill { background: linear-gradient(90deg, #4f46e5, #a855f7); height: 100%; width: 0%; border-radius: 999px; transition: width .4s; }
+
+    table.msg-table { width: 100%; border-collapse: separate; border-spacing: 0; direction: rtl; }
+    .msg-table thead th { background: #f8fafc; color: #475569; font-size: .76rem; font-weight: 800; text-align: right; padding: .85rem 1.1rem; border-bottom: 1px solid var(--border, #e2e8f0); white-space: nowrap; }
+    .msg-table tbody td { padding: .85rem 1.1rem; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle; font-size: .85rem; color: #1e293b; }
+    .msg-table tbody tr:last-child td { border-bottom: none; }
+    .msg-table tbody tr:hover { background: #f8fafc; }
+
+    .msg-item { padding: .8rem 1.25rem; border-bottom: 1px solid #f1f5f9; display: flex; gap: .9rem; align-items: flex-start; }
+    .msg-item:last-child { border-bottom: none; }
+    .msg-item:hover { background: #f8fafc; }
+    .msg-item .date { font-size: .72rem; color: #94a3b8; white-space: nowrap; padding-top: .2rem; min-width: 90px; }
+    .msg-item .text { flex: 1; font-size: .85rem; line-height: 1.9; color: #1e293b; }
+
+    .empty-state { padding: 2.5rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.2rem; margin-bottom: .8rem; display: block; color: #cbd5e1; }
+    .empty-state p { margin: 0; font-size: .88rem; line-height: 2; }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/aliases.js"></script>
+  <script>
+    const content = layout.init("import");
+    let jobsPoll = null;
+    let hadActive = false;
+
+    content.innerHTML = `
+      <div class="im-page">
+        <div class="hero">
+          <div>
+            <h1><i class="fas fa-upload"></i> ورود داده و آماده‌سازی</h1>
+            <p>استادسنج | ایمپورت پیام‌های تلگرام، ثبت استاد با نام مستعار خودکار و اجرای تطبیق</p>
+          </div>
+          <span class="hero-chip" id="lastUpdateChip"><i class="fas fa-clock"></i> آخرین به‌روزرسانی: -</span>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon si-blue"><i class="fas fa-message"></i></div><div><div class="stat-value" id="stTotal">-</div><div class="stat-label">کل پیام‌ها</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-violet"><i class="fas fa-font"></i></div><div><div class="stat-value" id="stText">-</div><div class="stat-label">پیام‌های متنی</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green"><i class="fas fa-users"></i></div><div><div class="stat-value" id="stAuthors">-</div><div class="stat-label">کاربران یکتا</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fas fa-link"></i></div><div><div class="stat-value" id="stMatches">-</div><div class="stat-label">تطبیق‌های پیام-استاد</div></div></div>
+        </div>
+
+        <div class="grid-2">
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-file-import"></i>ایمپورت فایل خروجی تلگرام</span></div>
+            <div class="card-x-body">
+              <div class="field">
+                <label>مسیر کامل فایل JSON (خروجی اکسپورت تلگرام)</label>
+                <input type="text" class="form-control" id="importPath" placeholder="/home/user/exports/result.json">
+              </div>
+              <button class="btn-x btn-primary-x btn-block" id="importBtn"><i class="fas fa-upload"></i> شروع ایمپورت</button>
+              <div class="form-note"><i class="fas fa-circle-info"></i> پیام‌های تکراری بر اساس شناسه تلگرام به‌صورت خودکار حذف می‌شوند؛ پس از ایمپورت، «اجرای تطبیق» را بزنید.</div>
+            </div>
+          </div>
+
+          <div class="card-x">
+            <div class="card-x-head"><span><i class="fas fa-wand-magic-sparkles"></i>تطبیق پیام‌ها با اساتید</span></div>
+            <div class="card-x-body">
+              <p class="match-desc">این عملیات همه پیام‌های واردشده را با نام و نام‌های مستعار اساتید تطبیق می‌دهد؛ پیام‌های پاسخ (ریپلای) نیز از طریق زمینه والد متصل می‌شوند و در صفحه «پیام‌ها» قابل بازبینی و تأیید/رد هستند.</p>
+              <div style="display:flex;gap:.6rem;flex-wrap:wrap;">
+                <button class="btn-x btn-primary-x" id="matchBtn"><i class="fas fa-play"></i> اجرای تطبیق</button>
+                <button class="btn-x btn-outline-x" id="resetMatchBtn"><i class="fas fa-rotate-left"></i> ریست بدون‌نتیجه‌ها</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-x">
+          <div class="card-x-head"><span><i class="fas fa-user-plus"></i>افزودن اساتید با نام مستعار خودکار</span></div>
+          <div class="card-x-body">
+            <div class="add-grid">
+              <div>
+                <div class="field">
+                  <label>نام اساتید (هر خط یک استاد)</label>
+                  <textarea class="form-control" id="bulkNames" placeholder="مثال:&#10;سیدرضا مرعشی&#10;محمود زاده"></textarea>
+                </div>
+                <div class="field">
+                  <label>دپارتمان (اختیاری)</label>
+                  <input type="text" class="form-control" id="bulkDepartment" placeholder="مثال: علوم پایه">
+                </div>
+                <div class="switch-line">
+                  <label class="switch"><input type="checkbox" id="clericalCheck"><span class="slider"></span></label>
+                  <span>افزودن پیشوندهای روحانی (حجت الاسلام، شیخ)</span>
+                </div>
+                <button class="btn-x btn-success-x btn-block" id="bulkAddBtn"><i class="fas fa-plus"></i> افزودن گروهی</button>
+              </div>
+              <div>
+                <div class="preview-label"><i class="fas fa-tags"></i> پیش‌نمایش زنده نام‌های مستعار</div>
+                <div class="preview-box" id="aliasPreview"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card-x">
+          <div class="card-x-head">
+            <span><i class="fas fa-list-check"></i>کارهای ایمپورت و تطبیق <span id="pollBadge" class="badge-pill bp-slate" style="margin-right:.5rem;"><span class="dot"></span>پایش غیرفعال</span></span>
+          </div>
+          <div style="overflow-x:auto;" id="jobsBox"></div>
+        </div>
+
+        <div class="card-x">
+          <div class="card-x-head"><span><i class="fas fa-clock-rotate-left"></i>آخرین پیام‌های واردشده</span></div>
+          <div id="recentBox"></div>
+        </div>
+      </div>
+    `;
+
+    function jobBadge(status) {
+      const map = {
+        running: ["bp-blue", "در حال اجرا"],
+        done: ["bp-green", "تمام‌شده"],
+        error: ["bp-red", "خطا"],
+        pending: ["bp-amber", "در صف"],
+        cancelled: ["bp-slate", "متوقف‌شده"]
+      };
+      const [cls, label] = map[status] || ["bp-slate", status];
+      return `<span class="badge-pill ${cls}"><span class="dot"></span>${label}</span>`;
+    }
+
+    function jobTypeLabel(name) {
+      if (name === "import_telegram") return "ایمپورت پیام";
+      if (name === "match_professors") return "تطبیق اساتید";
+      return name;
+    }
+
+    function updateLastUpdate() {
+      const t = new Date().toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+      const chip = document.getElementById("lastUpdateChip");
+      if (chip) chip.innerHTML = `<i class="fas fa-clock"></i> آخرین به‌روزرسانی: ${t}`;
+    }
+
+    function setPollBadge(active) {
+      const b = document.getElementById("pollBadge");
+      if (!b) return;
+      b.className = "badge-pill " + (active ? "bp-blue" : "bp-slate");
+      b.style.marginRight = ".5rem";
+      b.innerHTML = active ? '<span class="pulse-dot"></span>پایش خودکار فعال' : '<span class="dot"></span>پایش غیرفعال';
+    }
+
+    async function loadOverview() {
+      try {
+        const ov = await api.getOverview();
+        document.getElementById("stTotal").textContent = faNumber.format(ov.counts.total_messages);
+        document.getElementById("stText").textContent = faNumber.format(ov.counts.text_messages);
+        document.getElementById("stAuthors").textContent = faNumber.format(ov.counts.unique_authors);
+        document.getElementById("stMatches").textContent = faNumber.format(ov.counts.matched_message_professor_links);
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadJobs() {
+      const box = document.getElementById("jobsBox");
+      try {
+        const jobs = (await api.getJobs()).filter(j => j.name === "import_telegram" || j.name === "match_professors");
+        if (!jobs.length) {
+          box.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>هنوز کار ایمپورت یا تطبیقی اجرا نشده است.</p></div>';
+          stopJobsPoll();
+          updateLastUpdate();
+          return;
+        }
+        box.innerHTML = `
+          <table class="msg-table">
+            <thead><tr>
+              <th style="width:70px;">شناسه</th><th style="width:120px;">نوع</th><th style="width:120px;">وضعیت</th>
+              <th style="width:200px;">پیشرفت</th><th style="width:120px;">تعداد</th>
+              <th style="width:150px;">تاریخ</th><th>توضیح</th>
+            </tr></thead>
+            <tbody>
+              ${jobs.map(j => {
+                const pct = j.status === "done" ? 100 : Math.min(100, j.total > 0 ? Math.round((j.done / j.total) * 100) : 0);
+                return `
+                <tr>
+                  <td style="font-weight:700;">${faNumber.format(j.id)}</td>
+                  <td style="font-size:.8rem;">${jobTypeLabel(j.name)}</td>
+                  <td>${jobBadge(j.status)}</td>
+                  <td>
+                    <div class="progress-track"><div class="progress-fill" style="width:${pct}%;"></div></div>
+                    <div style="font-size:.7rem;color:#94a3b8;margin-top:.25rem;">${faNumber.format(pct)}٪</div>
+                  </td>
+                  <td style="font-size:.8rem;">${faNumber.format(j.done || 0)} از ${faNumber.format(j.total || 0)}</td>
+                  <td style="font-size:.78rem;color:#64748b;">${j.created_at || "-"}</td>
+                  <td style="font-size:.78rem;color:#94a3b8;">${j.error || "-"}</td>
+                </tr>`;
+              }).join("")}
+            </tbody>
+          </table>`;
+        const active = jobs.some(j => j.status === "running" || j.status === "pending");
+        if (active) {
+          hadActive = true;
+          startJobsPoll();
+        } else {
+          stopJobsPoll();
+          if (hadActive) {
+            hadActive = false;
+            loadOverview();
+          }
+        }
+        setPollBadge(active);
+        updateLastUpdate();
+      } catch (e) { console.error(e); }
+    }
+
+    function startJobsPoll() {
+      if (jobsPoll) return;
+      jobsPoll = setInterval(loadJobs, 3000);
+    }
+
+    function stopJobsPoll() {
+      if (jobsPoll) { clearInterval(jobsPoll); jobsPoll = null; }
+      setPollBadge(false);
+    }
+
+    async function loadRecent() {
+      const box = document.getElementById("recentBox");
+      try {
+        const rows = await api.getRecentMessages(6);
+        if (!rows.length) {
+          box.innerHTML = '<div class="empty-state"><i class="fas fa-message"></i><p>هنوز پیامی وارد نشده است.</p></div>';
+          return;
+        }
+        box.innerHTML = rows.map(m => `
+          <div class="msg-item">
+            <span class="date">${m.date || "-"}</span>
+            <span class="text">${m.text_preview}</span>
+          </div>`).join("");
+      } catch (e) { console.error(e); }
+    }
+
+    function renderAliasPreview() {
+      const box = document.getElementById("aliasPreview");
+      const names = document.getElementById("bulkNames").value.split("\n").map(s => s.trim()).filter(Boolean);
+      const clerical = document.getElementById("clericalCheck").checked;
+      if (!names.length) {
+        box.innerHTML = '<div class="empty-state" style="padding:1.4rem;"><p>با تایپ نام‌ها در ستون کنار، پیش‌نمایش نام‌های مستعار همین‌جا ظاهر می‌شود.</p></div>';
+        return;
+      }
+      box.innerHTML = names.map(n => {
+        const aliases = generateAliases(n, clerical);
+        return `
+          <div class="alias-row">
+            <div class="alias-name"><i class="fas fa-user-graduate"></i>${n}</div>
+            <div class="alias-chips">
+              ${aliases.map(a => `<span class="alias-chip">${a}</span>`).join("")}
+            </div>
+          </div>`;
+      }).join("");
+    }
+
+    document.getElementById("importBtn").addEventListener("click", async () => {
+      const path = document.getElementById("importPath").value.trim();
+      if (!path) { ui.showAlert("مسیر فایل را وارد کنید.", "warn"); return; }
+      try {
+        const res = await api.importLocal(path);
+        ui.showAlert(`ایمپورت شروع شد (کار #${faNumber.format(res.job_id)}).`, "success");
+        loadJobs();
+      } catch (e) { ui.showAlert("خطا: " + e.message, "danger"); }
+    });
+
+    document.getElementById("matchBtn").addEventListener("click", async () => {
+      if (!confirm("عملیات تطبیق پیام‌ها با اساتید شروع شود؟")) return;
+      try {
+        const res = await api.runMatching();
+        ui.showAlert(`تطبیق شروع شد (کار #${faNumber.format(res.job_id)}).`, "success");
+        loadJobs();
+      } catch (e) { ui.showAlert("خطا: " + e.message, "danger"); }
+    });
+
+    document.getElementById("resetMatchBtn").addEventListener("click", async () => {
+      if (!confirm("پیام‌های بدون تطبیق برای پردازش مجدد آماده شوند؟")) return;
+      try {
+        const res = await api.resetMatching("unmatched");
+        ui.showAlert(res.message || "ریست انجام شد.", "success");
+      } catch (e) { ui.showAlert("خطا: " + e.message, "danger"); }
+    });
+
+    document.getElementById("bulkAddBtn").addEventListener("click", async () => {
+      const namesText = document.getElementById("bulkNames").value.trim();
+      const department = document.getElementById("bulkDepartment").value.trim();
+      const clerical = document.getElementById("clericalCheck").checked;
+      if (!namesText) { ui.showAlert("لطفاً حداقل یک نام استاد وارد کنید.", "warn"); return; }
+      const names = namesText.split("\n").map(s => s.trim()).filter(Boolean);
+      if (!names.length) { ui.showAlert("نام معتبری یافت نشد.", "warn"); return; }
+      try {
+        const professors = names.map(name => ({ name, department: department || null, aliases: generateAliases(name, clerical) }));
+        const res = await api.createProfessorsBulk(professors);
+        ui.showAlert(`${faNumber.format(res.count)} استاد همراه با نام‌های مستعار اضافه شد. اکنون «اجرای تطبیق» را بزنید.`, "success");
+        document.getElementById("bulkNames").value = "";
+        document.getElementById("bulkDepartment").value = "";
+        renderAliasPreview();
+        loadOverview();
+      } catch (e) { ui.showAlert("خطا: " + e.message, "danger"); }
+    });
+
+    document.getElementById("bulkNames").addEventListener("input", renderAliasPreview);
+    document.getElementById("clericalCheck").addEventListener("change", renderAliasPreview);
+
+    loadOverview();
+    loadJobs();
+    loadRecent();
+    renderAliasPreview();
+  </script>
+</body>
+</html>

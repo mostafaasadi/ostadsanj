@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استادسنج — اساتید و رتبه‌بندی</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <style>
+    input, select, button { font-family: inherit; }
+    .pf-page { display: flex; flex-direction: column; gap: 1.25rem; }
+    .hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 60%, #a855f7 100%);
+      color: #fff; border-radius: 1.1rem; padding: 1.5rem 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 10px 30px -12px rgba(124, 58, 237, .5);
+    }
+    .hero h1 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .4rem 0; }
+    .hero p { margin: 0; opacity: .9; font-size: .87rem; line-height: 1.8; }
+    .hero-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .ghost-btn {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; border-radius: .7rem; padding: .55rem 1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: .45rem; text-decoration: none;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,.25); }
+    .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(165px, 1fr)); gap: 1rem; }
+    .stat-card {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.2rem; display: flex; align-items: center; gap: .9rem;
+      box-shadow: 0 1px 2px rgba(15,23,42,.04);
+    }
+    .stat-icon { width: 46px; height: 46px; border-radius: .85rem; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; }
+    .si-blue { background: #eff6ff; color: #2563eb; }
+    .si-green { background: #ecfdf5; color: #059669; }
+    .si-amber { background: #fffbeb; color: #d97706; }
+    .si-violet { background: #f5f3ff; color: #7c3aed; }
+    .si-slate { background: #f8fafc; color: #64748b; }
+    .stat-value { font-size: 1.3rem; font-weight: 800; color: #0f172a; line-height: 1.3; }
+    .stat-label { font-size: .76rem; color: #64748b; }
+    .toolbar {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.25rem; display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem;
+    }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field > label { font-size: .75rem; font-weight: 700; color: #64748b; }
+    .field .form-control { text-align: right; }
+    .search-wrap { position: relative; flex: 1; min-width: 210px; }
+    .search-wrap i { position: absolute; right: .9rem; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: .85rem; pointer-events: none; }
+    .search-wrap input { padding-right: 2.5rem !important; text-align: right !important; width: 100%; }
+    .table-card { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; overflow: hidden; }
+    .table-scroll { overflow-x: auto; }
+    table.msg-table { width: 100%; border-collapse: separate; border-spacing: 0; direction: rtl; }
+    .msg-table thead th {
+      position: sticky; top: 0; z-index: 2; background: #f8fafc; color: #475569;
+      font-size: .76rem; font-weight: 800; text-align: right; padding: .85rem 1.1rem;
+      border-bottom: 1px solid var(--border, #e2e8f0); white-space: nowrap;
+    }
+    .msg-table tbody td { padding: .9rem 1.1rem; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: middle; font-size: .86rem; color: #1e293b; }
+    .msg-table tbody tr:last-child td { border-bottom: none; }
+    .msg-table tbody tr { transition: background .15s; }
+    .msg-table tbody tr:hover { background: #f8fafc; }
+    .rank-badge {
+      display: inline-flex; align-items: center; justify-content: center;
+      min-width: 36px; height: 36px; border-radius: .75rem; font-weight: 800; font-size: .8rem;
+    }
+    .rb-gold { background: #fef3c7; color: #92400e; }
+    .rb-silver { background: #e5e7eb; color: #374151; }
+    .rb-bronze { background: #fed7aa; color: #9a3412; }
+    .rb-plain { background: transparent; color: #94a3b8; font-size: .78rem; }
+    .prof-name { font-weight: 800; font-size: .9rem; color: #0f172a; }
+    .prof-dept { font-size: .74rem; color: #94a3b8; margin-top: .15rem; }
+    .score-val { font-weight: 800; font-size: 1.15rem; line-height: 1.2; }
+    .score-lbl { font-size: .7rem; color: #94a3b8; }
+    .msg-main { font-weight: 700; font-size: .88rem; }
+    .msg-sub { font-size: .72rem; color: #7c3aed; font-weight: 600; margin-top: .15rem; }
+    .sat-row { display: flex; justify-content: space-between; font-size: .72rem; margin-bottom: .3rem; }
+    .sat-pos { color: #059669; font-weight: 700; }
+    .sat-neg { color: #dc2626; font-weight: 700; }
+    .sat-bar { background: #fee2e2; border-radius: 999px; height: 8px; overflow: hidden; min-width: 90px; }
+    .sat-fill { background: #10b981; height: 100%; border-radius: 999px; transition: width .4s; }
+    .sat-lbl { font-size: .7rem; color: #94a3b8; margin-top: .25rem; }
+    .badge-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .24rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .bp-green { background: #ecfdf5; color: #047857; } .bp-green .dot { background: #10b981; }
+    .bp-amber { background: #fffbeb; color: #b45309; } .bp-amber .dot { background: #f59e0b; }
+    .bp-red { background: #fef2f2; color: #b91c1c; } .bp-red .dot { background: #ef4444; }
+    .icon-btn {
+      width: 33px; height: 33px; border-radius: .65rem;
+      border: 1px solid var(--border, #e2e8f0); background: #fff;
+      display: inline-flex; align-items: center; justify-content: center;
+      color: #64748b; cursor: pointer; transition: all .15s; font-size: .78rem; text-decoration: none;
+    }
+    .icon-btn.ok:hover { background: #ecfdf5; color: #059669; border-color: #a7f3d0; }
+    .icon-btn.no:hover { background: #fef2f2; color: #dc2626; border-color: #fecaca; }
+    .actions-cell { display: inline-flex; gap: .35rem; }
+    .table-foot {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: .85rem 1.25rem; border-top: 1px solid var(--border, #e2e8f0);
+      font-size: .8rem; color: #64748b; flex-wrap: wrap; gap: .5rem;
+    }
+    .empty-state { padding: 3.5rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.4rem; margin-bottom: .9rem; display: block; color: #cbd5e1; }
+    .empty-state p { margin: 0; font-size: .9rem; }
+    .modal-backdrop {
+      position: fixed; inset: 0; background: rgba(15,23,42,.55);
+      display: flex; align-items: center; justify-content: center; z-index: 1000;
+    }
+    .modal-box {
+      background: #fff; border-radius: 1rem; padding: 1.5rem;
+      width: min(440px, 92vw); box-shadow: 0 20px 50px rgba(0,0,0,.35);
+    }
+    .modal-title { font-weight: 800; font-size: 1rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .modal-title i { color: #7c3aed; }
+    .modal-field { margin-bottom: .9rem; }
+    .modal-field label { display: block; font-size: .75rem; font-weight: 700; color: #64748b; margin-bottom: .35rem; }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
+    .btn-x {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border-radius: .75rem; padding: .6rem 1.2rem;
+      font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .15s; border: 1px solid transparent;
+    }
+    .btn-primary-x { background: #4f46e5; color: #fff; box-shadow: 0 6px 16px -6px rgba(79,70,229,.5); }
+    .btn-primary-x:hover { background: #4338ca; }
+    .btn-primary-x:disabled { opacity: .6; cursor: wait; }
+    .btn-outline-x { background: #fff; color: #334155; border-color: var(--border, #e2e8f0); }
+    .btn-outline-x:hover { background: #f8fafc; }
+    .check-line { display: flex; align-items: center; gap: .6rem; font-size: .85rem; font-weight: 600; color: #334155; }
+
+    #printReport { display: none; }
+    @media print {
+      #app { display: none !important; }
+      #modalRoot { display: none !important; }
+      #printReport { display: block !important; }
+      @page { size: A4 landscape; margin: 8mm; }
+      body { background: #fff !important; }
+    }
+    #printReport, #printReport * { print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+
+    .pr-page {
+      height: 194mm;
+      display: flex; flex-direction: column; gap: 2.5mm;
+      break-after: page; page-break-after: always;
+    }
+    .pr-page:last-of-type { break-after: auto; page-break-after: auto; }
+
+    .pr-rank-report { display: block; height: auto; break-after: page; page-break-after: always; }
+    .pr-rank-report:last-of-type { break-after: auto; page-break-after: auto; }
+    .pr-rank-report .pr-section { display: block; overflow: visible; min-height: 0; }
+    .pr-rank-report .pr-section-body { overflow: visible; flex: none; min-height: 0; }
+    .pr-rank-report .pr-banner, .pr-rank-report .pr-stats { break-inside: avoid; page-break-inside: avoid; }
+    .pr-table thead { display: table-header-group; }
+    .pr-table tr { break-inside: avoid; page-break-inside: avoid; }
+
+    .pr-banner {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #a855f7 100%);
+      color: #fff; border-radius: 7px; padding: 7px 12px;
+      display: flex; justify-content: space-between; align-items: center; flex: 0 0 auto;
+      margin-bottom: 2.5mm;
+    }
+    .pr-brand { font-size: 14px; font-weight: 800; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .pr-brand small { display: block; width: 100%; font-size: 8px; font-weight: 400; opacity: .92; margin-top: 2px; }
+    .pr-rank-badge {
+      background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #78350f;
+      padding: 2px 8px; border-radius: 999px; font-size: 9px; font-weight: 800;
+      box-shadow: 0 1px 3px rgba(0,0,0,.25);
+    }
+    .pr-banner-left { text-align: left; font-size: 8px; line-height: 1.8; opacity: .96; }
+    .pr-banner-sm { padding: 5px 12px; }
+    .pr-banner-sm .pr-brand { font-size: 12px; }
+
+    .pr-stats { display: flex; gap: 3px; flex: 0 0 auto; margin-bottom: 2.5mm; }
+    .pr-stat { flex: 1; border-radius: 6px; padding: 5px 4px; text-align: center; color: #fff; }
+    .pr-stat i { font-size: 9px; opacity: .85; display: block; margin-bottom: 1px; }
+    .pr-stat b { display: block; font-size: 12px; font-weight: 800; }
+    .pr-stat span { font-size: 7.5px; opacity: .92; }
+    .prs-blue { background: linear-gradient(135deg, #2563eb, #3b82f6); }
+    .prs-green { background: linear-gradient(135deg, #059669, #10b981); }
+    .prs-red { background: linear-gradient(135deg, #dc2626, #ef4444); }
+    .prs-amber { background: linear-gradient(135deg, #d97706, #f59e0b); }
+    .prs-violet { background: linear-gradient(135deg, #6d28d9, #8b5cf6); }
+    .prs-slate { background: linear-gradient(135deg, #475569, #64748b); }
+
+    .pr-main { flex: 1; min-height: 0; display: grid; grid-template-columns: 1.08fr 1fr; gap: 2.5mm; }
+    .pr-col { display: flex; flex-direction: column; gap: 2.5mm; min-height: 0; }
+    .pr-flex { flex: 1; min-height: 0; }
+
+    .pr-charts-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 2mm; }
+    .pr-charts-grid img { width: 100%; height: 100%; object-fit: contain; background: #fff; border: 1px solid #d3d8e0; border-radius: 5px; }
+
+    .pr-section { border: 1px solid #d3d8e0; border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; min-height: 0; background: #fff; margin-bottom: 2.5mm; }
+    .pr-section-head {
+      background: linear-gradient(90deg, #eef2ff, #f5f3ff);
+      padding: 3px 9px; font-size: 9.5px; font-weight: 800; color: #3730a3;
+      flex: 0 0 auto; display: flex; align-items: center; gap: 5px;
+      border-bottom: 1px solid #e0e7ff;
+    }
+    .pr-section-head i { color: #7c3aed; font-size: 9px; }
+    .pr-section-head .pr-head-note { margin-right: auto; font-size: 7.5px; font-weight: 600; color: #64748b; }
+    .pr-section-body { padding: 5px 8px; font-size: 8.5px; color: #1e293b; line-height: 1.8; flex: 1; min-height: 0; overflow: hidden; }
+
+    .pr-summary-text { font-size: 9.5px; line-height: 2; margin: 0 0 4px 0; text-align: justify; }
+    .pr-sw { display: flex; gap: 6px; }
+    .pr-sw > div { flex: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 5px; padding: 4px 7px; }
+    .pr-sw b { font-size: 8.5px; display: flex; align-items: center; gap: 4px; margin-bottom: 2px; }
+    .pr-sw ul { margin: 0; padding-right: 12px; font-size: 8.5px; line-height: 1.75; }
+    .pr-warn { background: #fef2f2; border: 1px solid #fecaca; border-radius: 5px; padding: 4px 7px; margin-top: 4px; color: #991b1b; font-size: 8.5px; }
+
+    table.pr-table { width: 100%; border-collapse: collapse; font-size: 9px; color: #111; }
+    .pr-table th, .pr-table td { border: 1px solid #c2c8d4; padding: 3px 6px; text-align: right; vertical-align: middle; }
+    .pr-table th { background: linear-gradient(135deg, #4338ca, #6d28d9); color: #fff; font-weight: 800; white-space: nowrap; font-size: 8.5px; }
+    .pr-table tbody tr:nth-child(even) td { background: #f6f7fb; }
+    .pr-score { font-weight: 800; }
+    .pr-pill { display: inline-block; border-radius: 99px; padding: 1px 6px; font-size: 7.5px; font-weight: 700; }
+    .prp-green { background: #d1fae5; color: #065f46; }
+    .prp-amber { background: #fef3c7; color: #92400e; }
+    .prp-red { background: #fee2e2; color: #991b1b; }
+    .pr-medal { font-size: 11px; }
+
+    .pr-chips { display: flex; flex-wrap: wrap; gap: 3px; }
+    .pr-chip {
+      background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3;
+      padding: 1.5px 7px; border-radius: 999px; font-size: 8px; font-weight: 600;
+      display: inline-flex; align-items: center; gap: 4px;
+    }
+    .pr-chip b { background: #4338ca; color: #fff; border-radius: 999px; padding: 0 5px; font-size: 7px; }
+
+    .pr-msg { border-bottom: 1px solid #e8ebf3; padding: 4px 8px; }
+    .pr-msg:last-child { border-bottom: none; }
+    .pr-msg-text { font-size: 8.5px; font-weight: 600; color: #1e293b; line-height: 1.75; }
+    .pr-msg-kp { display: flex; align-items: flex-start; gap: 4px; margin-top: 2px; font-size: 8px; color: #6d28d9; font-weight: 700; line-height: 1.6; }
+    .pr-msg-kp i { font-size: 7px; margin-top: 2px; flex-shrink: 0; }
+    .pr-msg-foot { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin-top: 2px; font-size: 7.5px; color: #64748b; }
+    .pr-msg-chip { background: #f1f5f9; border-radius: 4px; padding: 0 5px; font-size: 7px; color: #475569; font-weight: 600; }
+    .pr-msg-score { font-weight: 800; margin-right: auto; }
+    .ltr-num { direction: ltr; unicode-bidi: isolate; display: inline-block; white-space: nowrap; }
+    .pr-notes-sec { flex: 0 0 auto; }
+    .pr-notes-body { columns: 2; column-gap: 7mm; padding: 5px 10px; font-size: 8px; color: #334155; line-height: 1.85; }
+    .pr-notes-body b { color: #1e293b; }
+    .pr-notes-body ul { margin: 0; padding-right: 13px; }
+    .pr-notes-body li { break-inside: avoid; }
+    .pr-formula {
+      background: #fffbeb; border: 1px solid #fcd34d; border-radius: 5px;
+      padding: 4px 8px; margin-top: 3px; font-size: 8px; color: #78350f; line-height: 1.8; break-inside: avoid;
+    }
+    .pr-formula b { color: #92400e; }
+    .pr-formula code {
+      background: #fef3c7; border: 1px solid #fcd34d; border-radius: 3px;
+      padding: 1px 4px; font-family: monospace; color: #78350f; direction: ltr; display: inline-block; font-size: 8px;
+    }
+
+    .pr-foot {
+      flex: 0 0 auto; display: flex; justify-content: space-between; align-items: center;
+      font-size: 7.5px; color: #64748b; border-top: 1px solid #d3d8e0; padding-top: 1.5mm; margin-top: 2.5mm;
+    }
+    .pr-page-no {
+      background: #eef2ff; border: 1px solid #c7d2fe; color: #3730a3;
+      padding: 1px 8px; border-radius: 999px; font-weight: 700; font-size: 7.5px;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="modalRoot"></div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/professor-shared.js"></script>
+  <script>
+    Chart.defaults.font.family = "Vazirmatn, sans-serif";
+    Chart.defaults.color = "#0f172a";
+    Chart.defaults.responsive = true;
+    Chart.defaults.maintainAspectRatio = false;
+
+    const content = layout.init("professors");
+    const state = { search: "", sort: "rank_desc", filter: "all" };
+    let allProfessors = [];
+    let bayesMap = {};
+
+    const BAYES_M = 8;
+
+    function computeBayes() {
+      bayesMap = {};
+      const scored = allProfessors.filter(p => p.overall_score !== null && p.overall_score !== undefined);
+      if (!scored.length) return;
+      const C = scored.reduce((s, p) => s + p.overall_score, 0) / scored.length;
+      const entries = allProfessors.map(p => {
+        const R = p.overall_score;
+        const v = p.message_count || 0;
+        const rs = (R === null || R === undefined) ? null : ((v / (v + BAYES_M)) * R + (BAYES_M / (v + BAYES_M)) * C);
+        return { id: p.id, rank_score: rs !== null ? Math.round(rs * 10) / 10 : null };
+      });
+      entries.sort((a, b) => (b.rank_score ?? -9999) - (a.rank_score ?? -9999));
+      entries.forEach((e, i) => { bayesMap[e.id] = { rank_score: e.rank_score, position: i + 1, total: entries.length }; });
+    }
+
+    function getRankValue(p) {
+      if (p.rank_score !== null && p.rank_score !== undefined) return p.rank_score;
+      const b = bayesMap[p.id];
+      if (b && b.rank_score !== null && b.rank_score !== undefined) return b.rank_score;
+      return p.overall_score;
+    }
+    function getConfidence(p) {
+      if (p.confidence_level) return p.confidence_level;
+      const v = p.message_count || 0;
+      if (v >= 15) return "high";
+      if (v >= 5) return "medium";
+      return "low";
+    }
+    function confFa(level) { return { high: "بالا", medium: "متوسط", low: "پایین" }[level] || "-"; }
+    function confBadge(level) {
+      if (level === "high")   return '<span class="badge-pill bp-green"><span class="dot"></span>اعتماد بالا</span>';
+      if (level === "medium") return '<span class="badge-pill bp-amber"><span class="dot"></span>اعتماد متوسط</span>';
+      return '<span class="badge-pill bp-red"><span class="dot"></span>اعتماد پایین</span>';
+    }
+    function rankBadge(id) {
+      const b = bayesMap[id];
+      if (!b) return '<span class="rank-badge rb-plain">-</span>';
+      const r = b.position - 1;
+      if (r === 0) return '<span class="rank-badge rb-gold">🥇</span>';
+      if (r === 1) return '<span class="rank-badge rb-silver">🥈</span>';
+      if (r === 2) return '<span class="rank-badge rb-bronze">🥉</span>';
+      return `<span class="rank-badge rb-plain">${faNum(b.position)}</span>`;
+    }
+
+    content.innerHTML = `
+      <div class="pf-page">
+        <div class="hero">
+          <div>
+            <h1><i class="fas fa-users"></i> اساتید و رتبه‌بندی</h1>
+            <p>استادسنج | رتبه‌بندی عادلانه بر اساس میانگین بیزی (امتیاز رتبه‌ای)، همراه با امتیاز واقعی هر استاد</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost-btn" id="printBtn"><i class="fas fa-print"></i> پرینت گزارش رتبه‌بندی</button>
+            <button class="ghost-btn" id="groupPrintBtn"><i class="fas fa-file-pdf"></i> دانلود گزارش گروهی</button>
+          </div>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <div class="stat-grid">
+          <div class="stat-card"><div class="stat-icon si-blue"><i class="fas fa-user-graduate"></i></div><div><div class="stat-value" id="stTotal">-</div><div class="stat-label">کل اساتید</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-green"><i class="fas fa-circle-check"></i></div><div><div class="stat-value" id="stWithData">-</div><div class="stat-label">داده کافی</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-amber"><i class="fas fa-circle-exclamation"></i></div><div><div class="stat-value" id="stLowData">-</div><div class="stat-label">داده کم</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-violet"><i class="fas fa-star-half-stroke"></i></div><div><div class="stat-value" id="stAvgScore">-</div><div class="stat-label">میانگین امتیاز</div></div></div>
+          <div class="stat-card"><div class="stat-icon si-slate"><i class="fas fa-link"></i></div><div><div class="stat-value" id="stMatches">-</div><div class="stat-label">کل تطبیق‌ها</div></div></div>
+        </div>
+
+        <div class="toolbar">
+          <div class="field">
+            <label>مرتب‌سازی</label>
+            <select class="form-control" id="sortSelect" style="min-width:180px;">
+              <option value="rank_desc">رتبه (نزولی) 🏆</option>
+              <option value="score_desc">امتیاز واقعی (نزولی)</option>
+              <option value="score_asc">امتیاز واقعی (صعودی)</option>
+              <option value="messages_desc">بیشترین پیام</option>
+              <option value="positive_desc">مثبت‌ترین</option>
+              <option value="name_asc">نام (الفبا)</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>فیلتر</label>
+            <select class="form-control" id="filterSelect" style="min-width:170px;">
+              <option value="all">همه اساتید</option>
+              <option value="with_data">فقط داده کافی</option>
+              <option value="low_data">فقط داده کم</option>
+              <option value="positive">فقط امتیاز مثبت</option>
+              <option value="high_conf">فقط اعتماد بالا</option>
+              <option value="medium_conf">فقط اعتماد متوسط</option>
+              <option value="low_conf">فقط اعتماد پایین</option>
+            </select>
+          </div>
+          <div class="field" style="flex:1;">
+            <label>جستجو</label>
+            <div class="search-wrap">
+              <i class="fas fa-magnifying-glass"></i>
+              <input type="text" class="form-control" id="searchInput" placeholder="نام استاد یا دپارتمان…">
+            </div>
+          </div>
+        </div>
+
+        <div class="table-card">
+          <div class="table-scroll" id="professorsTable"></div>
+          <div class="table-foot">
+            <span id="footInfo"></span>
+            <span style="font-size:.74rem;color:#94a3b8;"><i class="fas fa-circle-info"></i> <b>امتیاز رتبه‌ای:</b> میانگین بیزی (کشش به میانگین جامعه بر اساس حجم نظرات) — <b>امتیاز واقعی:</b> میانگین وزنی نظرات خود استاد</span>
+          </div>
+        </div>
+      </div>
+    `;
+
+    async function loadRanking() {
+      const box = document.getElementById("professorsTable");
+      box.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>در حال بارگذاری…</p></div>';
+      try {
+        const data = await api.getProfessorsRanking();
+        allProfessors = data.professors || [];
+        computeBayes();
+        renderStats();
+        renderTable();
+      } catch (err) {
+        box.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>خطا در بارگذاری: ${err.message}</p></div>`;
+      }
+    }
+
+    function computeStats() {
+      const total = allProfessors.length;
+      const withData = allProfessors.filter(p => p.has_enough_data).length;
+      const lowData = total - withData;
+      const scored = allProfessors.filter(p => p.overall_score !== null && p.overall_score !== undefined);
+      const avg = scored.length ? Math.round(scored.reduce((s, p) => s + p.overall_score, 0) / scored.length) : null;
+      const matches = allProfessors.reduce((s, p) => s + (p.total_matched || 0), 0);
+      return { total, withData, lowData, avg, matches };
+    }
+
+    function renderStats() {
+      const s = computeStats();
+      document.getElementById("stTotal").innerHTML = faNum(s.total);
+      document.getElementById("stWithData").innerHTML = faNum(s.withData);
+      document.getElementById("stLowData").innerHTML = faNum(s.lowData);
+      document.getElementById("stAvgScore").innerHTML = s.avg !== null ? faNum(s.avg) : "-";
+      document.getElementById("stMatches").innerHTML = faNum(s.matches);
+    }
+
+    function renderTable() {
+      const box = document.getElementById("professorsTable");
+      let rows = [...allProfessors];
+      const term = state.search.trim().toLowerCase();
+      if (term) rows = rows.filter(p => p.name.toLowerCase().includes(term) || (p.department || "").toLowerCase().includes(term));
+      if (state.filter === "with_data")    rows = rows.filter(p => p.has_enough_data);
+      if (state.filter === "low_data")     rows = rows.filter(p => !p.has_enough_data);
+      if (state.filter === "positive")     rows = rows.filter(p => (p.overall_score || 0) > 0);
+      if (state.filter === "high_conf")    rows = rows.filter(p => getConfidence(p) === "high");
+      if (state.filter === "medium_conf")  rows = rows.filter(p => getConfidence(p) === "medium");
+      if (state.filter === "low_conf")     rows = rows.filter(p => getConfidence(p) === "low");
+      rows.sort((a, b) => {
+        const av = getRankValue(a), bv = getRankValue(b);
+        const an = (av === null || av === undefined) ? -9999 : av;
+        const bn = (bv === null || bv === undefined) ? -9999 : bv;
+        switch (state.sort) {
+          case "rank_desc":      return bn - an;
+          case "score_desc":     return (b.overall_score ?? -9999) - (a.overall_score ?? -9999);
+          case "score_asc":      return (a.overall_score ?? 9999) - (b.overall_score ?? 9999);
+          case "messages_desc":  return (b.total_matched || 0) - (a.total_matched || 0);
+          case "positive_desc":  return (b.positive_count || 0) - (a.positive_count || 0);
+          case "name_asc":       return a.name.localeCompare(b.name, "fa");
+          default: return 0;
+        }
+      });
+      document.getElementById("footInfo").innerHTML = `نمایش ${faNum(rows.length)} از ${faNum(allProfessors.length)} استاد`;
+      if (!rows.length) {
+        box.innerHTML = '<div class="empty-state"><i class="fas fa-users-slash"></i><p>استادی با این فیلترها یافت نشد.</p></div>';
+        return;
+      }
+      box.innerHTML = `
+        <table class="msg-table">
+          <thead>
+            <tr>
+              <th style="width:64px;text-align:center;">رتبه</th>
+              <th>استاد</th>
+              <th style="width:120px;text-align:center;">امتیاز رتبه‌ای</th>
+              <th style="width:110px;text-align:center;">امتیاز واقعی</th>
+              <th style="width:110px;text-align:center;">پیام‌ها</th>
+              <th style="width:150px;">رضایت</th>
+              <th style="width:80px;text-align:center;">کاربران</th>
+              <th style="width:120px;text-align:center;">سطح اعتماد</th>
+              <th style="width:96px;text-align:center;">وضعیت</th>
+              <th style="width:120px;text-align:center;">عملیات</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rows.map(p => {
+              const evalCount = p.message_count || 0;
+              const posRate = evalCount > 0 ? Math.round((p.positive_count / evalCount) * 100) : 0;
+              const rankVal = getRankValue(p);
+              const realVal = p.overall_score;
+              const conf = getConfidence(p);
+              return `
+              <tr>
+                <td style="text-align:center;">${rankBadge(p.id)}</td>
+                <td>
+                  <div class="prof-name">${p.name}</div>
+                  <div class="prof-dept">${p.department || "بدون دپارتمان"}</div>
+                </td>
+                <td style="text-align:center;">
+                  <div class="score-val" style="color:${scoreColor(rankVal)};">${faNum(rankVal)}</div>
+                  <div class="score-lbl">${scoreLabel(rankVal)}</div>
+                </td>
+                <td style="text-align:center;">
+                  <div class="score-val" style="color:${scoreColor(realVal)};">${faNum(realVal)}</div>
+                  <div class="score-lbl">${faNum(evalCount)} نظر</div>
+                </td>
+                <td style="text-align:center;">
+                  <div class="msg-main">${faNum(p.total_matched || 0)}</div>
+                  <div class="msg-sub">${faNum(evalCount)} نظر واقعی</div>
+                </td>
+                <td>
+                  <div class="sat-row">
+                    <span class="sat-pos"><i class="fas fa-thumbs-up"></i> ${faNum(p.positive_count || 0)}</span>
+                    <span class="sat-neg"><i class="fas fa-thumbs-down"></i> ${faNum(p.negative_count || 0)}</span>
+                  </div>
+                  <div class="sat-bar"><div class="sat-fill" style="width:${posRate}%;"></div></div>
+                  <div class="sat-lbl">${faPct(posRate)} مثبت</div>
+                </td>
+                <td style="text-align:center;font-weight:700;">${faNum(p.unique_users || 0)}</td>
+                <td style="text-align:center;">${confBadge(conf)}</td>
+                <td style="text-align:center;">
+                  ${p.has_enough_data
+                    ? '<span class="badge-pill bp-green"><span class="dot"></span>داده کافی</span>'
+                    : '<span class="badge-pill bp-amber"><span class="dot"></span>داده کم</span>'}
+                </td>
+                <td style="text-align:center;">
+                  <div class="actions-cell">
+                    <a class="icon-btn ok" title="مشاهده کارنامه" href="professor-profile.html?id=${p.id}"><i class="fas fa-chart-line"></i></a>
+                    <button class="icon-btn" title="ویرایش نام" onclick="editProfessor(${p.id})"><i class="fas fa-pen"></i></button>
+                    <button class="icon-btn no" title="حذف استاد" onclick="deleteProfessor(${p.id})"><i class="fas fa-trash"></i></button>
+                  </div>
+                </td>
+              </tr>`;
+            }).join("")}
+          </tbody>
+        </table>`;
+    }
+
+    const doughnutLabelsPlugin = {
+      id: "doughnutLabels",
+      afterDatasetsDraw(chart, args, opts) {
+        const fontSize = (opts && opts.fontSize) || 12;
+        const minPercent = (opts && opts.minPercent) || 3;
+        const meta = chart.getDatasetMeta(0);
+        const data = chart.data.datasets[0].data;
+        const total = data.reduce((a, b) => a + b, 0);
+        if (!total) return;
+        const { ctx } = chart;
+        meta.data.forEach((arc, i) => {
+          const pct = (data[i] / total) * 100;
+          if (pct < minPercent) return;
+          const p = arc.getProps(["x", "y", "startAngle", "endAngle", "outerRadius", "innerRadius"]);
+          const mid = (p.startAngle + p.endAngle) / 2;
+          const r = (p.outerRadius + p.innerRadius) / 2;
+          ctx.save();
+          ctx.fillStyle = "#ffffff";
+          ctx.font = `700 ${fontSize}px Vazirmatn, sans-serif`;
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
+          ctx.fillText(`${Math.round(pct)}%`, p.x + Math.cos(mid) * r, p.y + Math.sin(mid) * r);
+          ctx.restore();
+        });
+      }
+    };
+
+    function chartBaseOptions(printMode) {
+      return {
+        responsive: !printMode,
+        maintainAspectRatio: false,
+        animation: printMode ? false : undefined,
+        devicePixelRatio: printMode ? 2 : undefined,
+        plugins: {
+          legend: { position: "bottom", labels: { padding: printMode ? 8 : 10, font: { size: printMode ? 10 : 11, family: "Vazirmatn" } } },
+          tooltip: { rtl: true, textDirection: "rtl" }
+        }
+      };
+    }
+
+    function buildSentimentChart(canvas, printMode, prof) {
+      const s = prof.score;
+      const sd = [s.positive_count || 0, s.negative_count || 0, s.neutral_count || 0, s.mixed_count || 0];
+      const opts = chartBaseOptions(printMode);
+      opts.plugins.legend = {
+        position: "bottom",
+        labels: {
+          padding: printMode ? 8 : 10,
+          font: { size: printMode ? 10 : 11, family: "Vazirmatn" },
+          generateLabels: (chart) => {
+            const data = chart.data.datasets[0].data;
+            const t = data.reduce((a, b) => a + b, 0);
+            const meta = chart.getDatasetMeta(0);
+            return chart.data.labels.map((label, i) => {
+              const style = meta.controller.getStyle(i);
+              const pct = t ? Math.round((data[i] / t) * 100) : 0;
+              return {
+                text: `${label}: ${pct}% (${data[i]})`,
+                fillStyle: style.backgroundColor, strokeStyle: style.borderColor,
+                lineWidth: style.borderWidth, hidden: !chart.getDataVisibility(i), index: i
+              };
+            });
+          }
+        }
+      };
+      opts.plugins.doughnutLabels = { fontSize: printMode ? 11 : 12, minPercent: 3 };
+      return new Chart(canvas, {
+        type: "doughnut",
+        data: { labels: ["مثبت", "منفی", "خنثی", "مختلط"], datasets: [{ data: sd, backgroundColor: ["#10b981", "#ef4444", "#94a3b8", "#f59e0b"], borderWidth: 2, borderColor: "#fff" }] },
+        options: opts,
+        plugins: [doughnutLabelsPlugin]
+      });
+    }
+
+    function buildRadarChart(canvas, printMode, prof) {
+      const aspects = (prof.aspects || []).slice(0, 8);
+      const scores = aspects.map(a => Math.round((a.avg_score || 0) * 100));
+      const opts = chartBaseOptions(printMode);
+      opts.scales = {
+        r: {
+          min: -100, max: 100,
+          ticks: { stepSize: 50, showLabelBackdrop: false, color: "#94a3b8", font: { size: printMode ? 9 : 10, family: "Vazirmatn" }, callback: v => v },
+          grid: { color: "rgba(100,116,139,.18)" },
+          angleLines: { color: "rgba(100,116,139,.18)" },
+          pointLabels: { color: "#334155", font: { size: printMode ? 10 : 11, weight: 700, family: "Vazirmatn" }, callback: (label, i) => [label, `${scores[i]}`] }
+        }
+      };
+      return new Chart(canvas, {
+        type: "radar",
+        data: {
+          labels: aspects.map(a => aspectLabel(a.aspect)),
+          datasets: [
+            { label: "امتیاز استاد", data: scores, backgroundColor: "rgba(124,58,237,.20)", borderColor: "#7c3aed", borderWidth: 2, pointBackgroundColor: "#7c3aed", pointRadius: printMode ? 4 : 3, pointBorderColor: "#fff", pointBorderWidth: 1 },
+            { label: "میانگین (صفر)", data: new Array(aspects.length).fill(0), backgroundColor: "rgba(148,163,184,.08)", borderColor: "rgba(148,163,184,.55)", borderWidth: 1, borderDash: [5, 5], pointRadius: 0 }
+          ]
+        },
+        options: opts
+      });
+    }
+
+    function buildAspectsChart(canvas, printMode, prof) {
+      const aspects = (prof.aspects || []).slice(0, 8);
+      const scores = aspects.map(a => Math.round((a.avg_score || 0) * 100));
+      const opts = chartBaseOptions(printMode);
+      opts.indexAxis = "y";
+      opts.scales = {
+        y: { position: "right", ticks: { font: { size: printMode ? 10 : 11, family: "Vazirmatn", weight: 600 } }, grid: { display: false } },
+        x: {
+          type: "linear", position: "bottom", min: -100, max: 100,
+          title: { display: true, text: "امتیاز", font: { size: printMode ? 9 : 10, family: "Vazirmatn" } },
+          ticks: { font: { size: printMode ? 9 : 10 }, callback: v => v },
+          grid: { color: c => c.tick.value === 0 ? "rgba(15,23,42,.25)" : "rgba(15,23,42,.06)" }
+        },
+        y1: { type: "linear", position: "top", min: 0, title: { display: true, text: "تعداد نظر", font: { size: printMode ? 9 : 10, family: "Vazirmatn" } }, ticks: { font: { size: printMode ? 9 : 10 } }, grid: { drawOnChartArea: false } }
+      };
+      return new Chart(canvas, {
+        type: "bar",
+        data: {
+          labels: aspects.map(a => aspectLabel(a.aspect)),
+          datasets: [
+            { type: "bar", label: "میانگین امتیاز", data: scores, backgroundColor: scores.map(v => v > 0 ? "rgba(16,185,129,.8)" : v < 0 ? "rgba(239,68,68,.8)" : "rgba(148,163,184,.8)"), borderRadius: 4, yAxisID: "y" },
+            { type: "line", label: "تعداد نظر", data: aspects.map(a => a.count || 0), borderColor: "#7c3aed", backgroundColor: "rgba(124,58,237,.1)", tension: .4, pointRadius: printMode ? 4 : 3, pointBackgroundColor: "#7c3aed", yAxisID: "y1" }
+          ]
+        },
+        options: opts
+      });
+    }
+
+    function buildTimelineChart(canvas, printMode, prof) {
+      const tl = prof.timeline || [];
+      const opts = chartBaseOptions(printMode);
+      opts.scales = {
+        y: { type: "linear", position: "right", min: -100, max: 100, title: { display: true, text: "امتیاز", font: { size: printMode ? 9 : 10, family: "Vazirmatn" } }, ticks: { font: { size: printMode ? 9 : 10 }, callback: v => v }, grid: { color: c => c.tick.value === 0 ? "rgba(15,23,42,.25)" : "rgba(15,23,42,.06)" } },
+        y1: { type: "linear", position: "left", min: 0, title: { display: true, text: "تعداد پیام", font: { size: printMode ? 9 : 10, family: "Vazirmatn" } }, ticks: { font: { size: printMode ? 9 : 10 } }, grid: { drawOnChartArea: false } },
+        x: { ticks: { font: { size: printMode ? 9 : 10, family: "Vazirmatn" }, maxRotation: 45, minRotation: 45 } }
+      };
+      return new Chart(canvas, {
+        type: "line",
+        data: {
+          labels: tl.map(t => t.month),
+          datasets: [
+            { label: "امتیاز ماهانه", data: tl.map(t => t.avg_score || 0), borderColor: "#7c3aed", backgroundColor: "rgba(124,58,237,.12)", tension: .4, fill: true, yAxisID: "y", pointRadius: printMode ? 3 : 2, pointBackgroundColor: "#7c3aed" },
+            { label: "تعداد پیام", data: tl.map(t => t.total || 0), borderColor: "#94a3b8", backgroundColor: "rgba(148,163,184,.1)", tension: .4, fill: false, yAxisID: "y1", borderDash: [5, 5], pointRadius: printMode ? 3 : 2 }
+          ]
+        },
+        options: opts
+      });
+    }
+
+    function captureForPrint(buildFn, w, h, prof) {
+      const canvas = document.createElement("canvas");
+      canvas.style.width = w + "px";
+      canvas.style.height = h + "px";
+      canvas.style.position = "fixed";
+      canvas.style.left = "-99999px";
+      canvas.style.top = "0";
+      document.body.appendChild(canvas);
+      const ch = buildFn(canvas, true, prof);
+      const tmp = document.createElement("canvas");
+      tmp.width = canvas.width;
+      tmp.height = canvas.height;
+      const tctx = tmp.getContext("2d");
+      tctx.fillStyle = "#ffffff";
+      tctx.fillRect(0, 0, tmp.width, tmp.height);
+      tctx.drawImage(canvas, 0, 0);
+      const url = tmp.toDataURL("image/png");
+      ch.destroy();
+      canvas.remove();
+      return url;
+    }
+
+    function insertAndPrint(html, title) {
+      let box = document.getElementById("printReport");
+      if (!box) {
+        box = document.createElement("div");
+        box.id = "printReport";
+        document.body.appendChild(box);
+      }
+      box.innerHTML = html;
+      const oldTitle = document.title;
+      document.title = title;
+      window.addEventListener("afterprint", () => {
+        document.title = oldTitle;
+        box.innerHTML = "";
+      }, { once: true });
+      setTimeout(() => { window.print(); }, 60);
+    }
+
+    function sanitizeFileNamePart(s) {
+      return String(s || "")
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\u200c|\u200f|\u200e/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function makeFileName(parts) {
+      const now = new Date();
+      const d = now.toLocaleDateString("fa-IR-u-nu-latn", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-");
+      const clean = (Array.isArray(parts) ? parts : [parts])
+        .map(sanitizeFileNamePart)
+        .filter(Boolean)
+        .join("-");
+      return `استادسنج-${clean}-${d}`;
+    }
+
+    function makeRankingFileName(count) {
+      return makeFileName(["رتبه‌بندی-اساتید", `${count}-استاد`]);
+    }
+
+    function makeGroupFileName(dept, count, onlyEnough) {
+      const scope = dept === "__all__" ? "همه-گروه‌ها" : dept;
+      const parts = ["کارنامه-گروهی", scope, `${count}-استاد`];
+      if (onlyEnough) parts.push("داده-کافی");
+      return makeFileName(parts);
+    }
+
+    function notesHtml() {
+      return `
+      <div class="pr-page">
+        <div class="pr-banner pr-banner-sm">
+          <div class="pr-brand">استادسنج<small>راهنمای خواندن گزارش و روش محاسبه</small></div>
+          <div class="pr-banner-left">صفحهٔ پایانی</div>
+        </div>
+        <div class="pr-section" style="flex:1;">
+          <div class="pr-section-head"><i class="fas fa-circle-info"></i> راهنمای خواندن کارنامه و روش محاسبه</div>
+          <div class="pr-notes-body" style="height:100%;">
+            <ul>
+              <li><b>🏆 امتیاز رتبه‌ای (Bayesian):</b> مبنای اصلی رتبه‌بندی؛ از فرمول میانگین بیزی محاسبه می‌شود تا اساتید کم‌نظر به‌طور ناعادلانه صدرنشین نشوند.
+                <div class="pr-formula">
+                  <b>فرمول:</b> <code>rank_score = (v / (v + m)) × R + (m / (v + m)) × C</code> —
+                  <b>v</b>: تعداد نظرات واقعی | <b>m</b>: ۸ (حداقل اعتماد) | <b>R</b>: امتیاز واقعی استاد | <b>C</b>: میانگین سراسری همه اساتید.
+                  با نظرات کم، امتیاز به میانگین جامعه کشیده می‌شود؛ با نظرات زیاد، به امتیاز واقعی نزدیک می‌شود.
+                </div>
+              </li>
+              <li><b>📊 امتیاز واقعی:</b> میانگین وزن‌دار امتیاز احساس نظرات واقعی (وزن هر نظر = اعتماد تحلیل) در بازه ۱۰۰- تا ۱۰۰+؛ برچسب‌ها: عالی (۶۰+)، خوب (۳۰+)، متوسط (۰+)، ضعیف (۳۰-)، خیلی ضعیف (کمتر از ۳۰-).</li>
+              <li><b>💬 نظر واقعی در برابر سوال:</b> پیام‌های سوال و اطلاع‌رسانی در امتیاز دخالت ندارند؛ فقط پیام‌های حاوی نظر، ارزیابی، تجربه، شکایت یا توصیه صریح شمرده می‌شوند.</li>
+              <li><b>📝 اصل نظر و تفسیر:</b> در بخش نظرات برجسته، متن پررنگ «اصل پیام دانشجو» و خط بنفش زیر آن «تفسیر هوشمند» (خلاصهٔ یک‌خطی نظر) است؛ این دو هرگز با هم ترکیب نمی‌شوند.</li>
+              <li><b>📐 ابعاد عملکرد:</b> امتیاز هر بعد، میانگین امتیاز نظراتی است که صریحاً به همان بعد اشاره دارند؛ ابعاد بدون نظر در جدول نمی‌آیند.</li>
+              <li><b>🤖 گزارش هوشمند:</b> پاراگراف تحلیلی و نقاط قوت/ضعف/هشدار توسط مدل هوش مصنوعی و صرفاً بر اساس آمار و خلاصه نظرات ثبت‌شده تولید شده است.</li>
+              <li><b>⚠️ موارد جدی:</b> اتهاماتی مانند تبعیض، رشوه، توهین یا شکایت جدی با شدت متوسط/بالا علامت‌گذاری می‌شوند؛ بررسی انسانی پیش از هر اقدام اداری الزامی است.</li>
+              <li><b>👥 کاربر یکتا:</b> تعداد افراد متمایزی که درباره استاد پیام گذاشته‌اند؛ پیام‌های تکراری یک فرد فقط یک‌بار شمرده می‌شود.</li>
+              <li><b>📅 تاریخ‌ها:</b> همه تاریخ‌های این گزارش شمسی است.</li>
+              <li><b>⚖️ سلب مسئولیت:</b> این گزارش خروجی تحلیل خودکار است؛ برای تصمیم‌های حساس اداری، بررسی انسانی پیام‌های اصلی توصیه می‌شود.</li>
+            </ul>
+          </div>
+        </div>
+        <div class="pr-foot">
+          <span>استادسنج — سامانه تحلیل نظرات دانشجویان</span>
+          <span class="pr-page-no">صفحهٔ پایانی</span>
+          <span>پایان گزارش</span>
+        </div>
+      </div>`;
+    }
+
+    function buildPrintReport() {
+      if (!allProfessors.length) { ui.showAlert("داده‌ای برای چاپ وجود ندارد.", "warn"); return; }
+      const s = computeStats();
+      const ranked = [...allProfessors].sort((a, b) => {
+        const av = getRankValue(a), bv = getRankValue(b);
+        const an = (av === null || av === undefined) ? -9999 : av;
+        const bn = (bv === null || bv === undefined) ? -9999 : bv;
+        return bn - an;
+      });
+      const now = new Date();
+      const faNow = now.toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" });
+      const faTime = now.toLocaleTimeString("fa-IR", { hour: "2-digit", minute: "2-digit" });
+
+      const rows = ranked.map((p, i) => {
+        const evalCount = p.message_count || 0;
+        const posRate = evalCount > 0 ? Math.round((p.positive_count / evalCount) * 100) : 0;
+        const rankVal = getRankValue(p);
+        const realVal = p.overall_score;
+        const medal = i === 0 ? '<span class="pr-medal">🥇</span> ' : i === 1 ? '<span class="pr-medal">🥈</span> ' : i === 2 ? '<span class="pr-medal">🥉</span> ' : "";
+        const conf = getConfidence(p);
+        const confPill = conf === "high" ? '<span class="pr-pill prp-green">بالا</span>' : conf === "medium" ? '<span class="pr-pill prp-amber">متوسط</span>' : '<span class="pr-pill prp-red">پایین</span>';
+        return `
+          <tr>
+            <td style="text-align:center;"><b>${medal}${faNum(i + 1)}</b></td>
+            <td><b>${p.name}</b>${p.department ? ` <span style="color:#666;font-size:8px;">(${p.department})</span>` : ""}</td>
+            <td style="text-align:center;"><span class="pr-score" style="color:${scoreColor(rankVal)};">${faNum(rankVal)}</span> <span style="color:#64748b;font-size:8px;">(${scoreLabel(rankVal)})</span></td>
+            <td style="text-align:center;"><span class="pr-score" style="color:${scoreColor(realVal)};">${faNum(realVal)}</span></td>
+            <td style="text-align:center;">${faNum(evalCount)}</td>
+            <td style="text-align:center;"><span style="color:#059669;font-weight:700;">${faNum(p.positive_count || 0)}</span> / <span style="color:#dc2626;font-weight:700;">${faNum(p.negative_count || 0)}</span></td>
+            <td style="text-align:center;">${faPct(posRate)}</td>
+            <td style="text-align:center;">${faNum(p.unique_users || 0)}</td>
+            <td style="text-align:center;">${confPill}</td>
+            <td style="text-align:center;">${p.has_enough_data ? '<span class="pr-pill prp-green">کافی</span>' : '<span class="pr-pill prp-amber">کم</span>'}</td>
+          </tr>`;
+      }).join("");
+
+      const html = `
+      <div class="pr-rank-report">
+        <div class="pr-banner">
+          <div class="pr-brand">استادسنج<small>سامانه تحلیل نظرات دانشجویان | گزارش رتبه‌بندی بر اساس میانگین بیزی</small></div>
+          <div class="pr-banner-left">گزارش رتبه‌بندی اساتید<br>تاریخ: ${faNow} — ساعت ${faTime}</div>
+        </div>
+        <div class="pr-stats">
+          <div class="pr-stat prs-blue"><i class="fas fa-user-graduate"></i><b>${faNum(s.total)}</b><span>کل اساتید</span></div>
+          <div class="pr-stat prs-green"><i class="fas fa-circle-check"></i><b>${faNum(s.withData)}</b><span>داده کافی</span></div>
+          <div class="pr-stat prs-amber"><i class="fas fa-circle-exclamation"></i><b>${faNum(s.lowData)}</b><span>داده کم</span></div>
+          <div class="pr-stat prs-violet"><i class="fas fa-star-half-stroke"></i><b>${s.avg !== null ? faNum(s.avg) : "-"}</b><span>میانگین امتیاز</span></div>
+          <div class="pr-stat prs-slate"><i class="fas fa-link"></i><b>${faNum(s.matches)}</b><span>کل تطبیق‌ها</span></div>
+        </div>
+        <div class="pr-section">
+          <div class="pr-section-head"><i class="fas fa-trophy"></i> جدول رتبه‌بندی (مرتب‌شده بر اساس امتیاز رتبه‌ای) <span class="pr-head-note">${faNum(ranked.length)} استاد</span></div>
+          <div class="pr-section-body" style="padding:0;">
+            <table class="pr-table">
+              <thead>
+                <tr>
+                  <th style="width:34px;">رتبه</th><th>استاد</th>
+                  <th style="width:80px;">رتبه‌ای 🏆</th><th style="width:62px;">واقعی</th>
+                  <th style="width:44px;">نظرات</th><th style="width:56px;">مثبت/منفی</th><th style="width:48px;">رضایت</th>
+                  <th style="width:42px;">کاربر</th><th style="width:52px;">اعتماد</th><th style="width:48px;">وضعیت</th>
+                </tr>
+              </thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+        <div class="pr-foot">
+          <span>استادسنج — گزارش تولید خودکار</span>
+          <span class="pr-page-no">جدول: ${faNum(ranked.length)} استاد</span>
+          <span>${faNow}</span>
+        </div>
+      </div>` + notesHtml();
+      insertAndPrint(html, makeRankingFileName(ranked.length));
+    }
+
+    function openGroupModal() {
+      const depts = [...new Set(allProfessors.map(p => p.department).filter(Boolean))];
+      document.getElementById("modalRoot").innerHTML = `
+        <div class="modal-backdrop" id="groupModal">
+          <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-file-pdf"></i> ساخت گزارش گروهی (کارنامه کامل هر استاد)</div>
+            <div class="modal-field">
+              <label>گروه / دپارتمان</label>
+              <select class="form-control" id="grpDept">
+                <option value="__all__">همه گروه‌ها</option>
+                ${depts.map(d => `<option value="${d}">${d}</option>`).join("")}
+              </select>
+            </div>
+            <div class="modal-field">
+              <label class="check-line"><input type="checkbox" id="grpEnough" checked> فقط اساتید با داده کافی</label>
+            </div>
+            <div id="grpProgress" style="font-size:.8rem;color:#64748b;min-height:1.4rem;"></div>
+            <div class="modal-actions">
+              <button class="btn-x btn-outline-x" id="grpCancel">انصراف</button>
+              <button class="btn-x btn-primary-x" id="grpGo"><i class="fas fa-print"></i> ساخت و چاپ</button>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById("grpCancel").addEventListener("click", () => {
+        document.getElementById("modalRoot").innerHTML = "";
+      });
+      document.getElementById("grpGo").addEventListener("click", buildGroupPrintReport);
+    }
+
+    function buildPrintPage1(p, imgs, rankPosition, rankTotal) {
+      const s = p.score;
+      const st = p.stats;
+      const opinionCount = s.message_count || 0;
+      const posRate = opinionCount > 0 ? Math.round((s.positive_count / opinionCount) * 100) : 0;
+      const b = bayesMap[p.id];
+      const rankVal = (s.rank_score !== null && s.rank_score !== undefined) ? s.rank_score : (b ? b.rank_score : s.overall_score);
+      const realVal = s.overall_score;
+      const conf = confFa(getConfidence(p));
+      const faNow = new Date().toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" });
+
+      const aspectRows = (p.aspects || []).slice(0, 10).map(a => `
+        <tr>
+          <td><b>${aspectLabel(a.aspect)}</b></td>
+          <td style="text-align:center;"><span class="pr-score" style="color:${scoreColor((a.avg_score || 0) * 100)};">${faNum(Math.round((a.avg_score || 0) * 100), { signed: true })}</span></td>
+          <td style="text-align:center;">${faNum(a.count)}</td>
+          <td style="text-align:center;color:#059669;font-weight:700;">${faNum(a.positive)}</td>
+          <td style="text-align:center;color:#dc2626;font-weight:700;">${faNum(a.negative)}</td>
+          <td style="text-align:center;color:#64748b;">${faNum(a.neutral)}</td>
+        </tr>`).join("");
+
+      return `
+      <div class="pr-page">
+        <div class="pr-banner">
+          <div class="pr-brand">
+            ${rankPosition ? `<span class="pr-rank-badge">🏆 رتبه ${faNum(rankPosition)} از ${faNum(rankTotal)}</span>` : ""}
+            <span>${p.name}</span>
+            <small>${p.department || "بدون دپارتمان"} — کارنامه تحلیلی استادسنج</small>
+          </div>
+          <div class="pr-banner-left">
+            <b style="color:#fcd34d;">امتیاز رتبه‌ای:</b> ${faNum(rankVal)} (${scoreLabel(rankVal)}) |
+            <b>امتیاز واقعی:</b> ${faNum(realVal)} |
+            <b>اعتماد:</b> ${conf}<br>
+            ${faNum(opinionCount)} نظر واقعی | ${faNum(st.total_messages)} پیام | بازه: ${faDate(st.first_date)} تا ${faDate(st.last_date)}
+          </div>
+        </div>
+
+        <div class="pr-stats">
+          <div class="pr-stat prs-violet"><i class="fas fa-trophy"></i><b>${faNum(rankVal)}</b><span>امتیاز رتبه‌ای</span></div>
+          <div class="pr-stat prs-blue"><i class="fas fa-star-half-stroke"></i><b>${faNum(realVal)}</b><span>امتیاز واقعی</span></div>
+          <div class="pr-stat prs-green"><i class="fas fa-comments"></i><b>${faNum(opinionCount)}</b><span>نظر واقعی</span></div>
+          <div class="pr-stat prs-amber"><i class="fas fa-thumbs-up"></i><b>${faPct(posRate)}</b><span>رضایت مثبت</span></div>
+          <div class="pr-stat prs-red"><i class="fas fa-thumbs-down"></i><b>${faNum(s.negative_count)}</b><span>نظر منفی</span></div>
+          <div class="pr-stat prs-slate"><i class="fas fa-users"></i><b>${faNum(st.unique_users)}</b><span>کاربر یکتا</span></div>
+        </div>
+
+        <div class="pr-main">
+          <div class="pr-col">
+            <div class="pr-section">
+              <div class="pr-section-head"><i class="fas fa-file-pen"></i> گزارش تحلیلی هوشمند <span class="pr-head-note">تولید خودکار توسط هوش مصنوعی</span></div>
+              <div class="pr-section-body">
+                ${p.summary ? `
+                  <p class="pr-summary-text">${faText(p.summary.summary_text)}</p>
+                  <div class="pr-sw">
+                    <div><b style="color:#047857;"><i class="fas fa-thumbs-up"></i> نقاط قوت</b><ul>${(p.summary.strengths || []).map(x => `<li>${faText(x)}</li>`).join("") || "<li>-</li>"}</ul></div>
+                    <div><b style="color:#b91c1c;"><i class="fas fa-thumbs-down"></i> نقاط ضعف</b><ul>${(p.summary.weaknesses || []).map(x => `<li>${faText(x)}</li>`).join("") || "<li>-</li>"}</ul></div>
+                  </div>
+                  ${(p.summary.warnings || []).length ? `<div class="pr-warn"><b><i class="fas fa-triangle-exclamation"></i> هشدارهای جدی:</b> ${p.summary.warnings.map(x => faText(x)).join(" | ")}</div>` : ""}
+                ` : '<p class="pr-summary-text">خلاصه هوشمند برای این استاد تولید نشده است.</p>'}
+              </div>
+            </div>
+            <div class="pr-section pr-flex">
+              <div class="pr-section-head"><i class="fas fa-table"></i> جدول امتیاز ابعاد عملکرد <span class="pr-head-note">امتیاز هر بعد از -۱۰۰ تا +۱۰۰</span></div>
+              <div class="pr-section-body" style="padding:0;">
+                <table class="pr-table">
+                  <thead><tr><th>بعد عملکرد</th><th style="width:48px;">امتیاز</th><th style="width:40px;">تعداد</th><th style="width:40px;">مثبت</th><th style="width:40px;">منفی</th><th style="width:40px;">خنثی</th></tr></thead>
+                  <tbody>${aspectRows || '<tr><td colspan="6" style="text-align:center;">بعدی ثبت نشده است</td></tr>'}</tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <div class="pr-col">
+            <div class="pr-charts-grid">
+              <img src="${imgs.sentiment}" alt="توزیع احساس‌ها">
+              <img src="${imgs.radar}" alt="رادار ابعاد">
+              <img src="${imgs.aspects}" alt="مقایسه ابعاد">
+              <img src="${imgs.timeline}" alt="روند زمانی">
+            </div>
+          </div>
+        </div>
+
+        <div class="pr-foot">
+          <span>استادسنج — سامانه تحلیل نظرات دانشجویان | تولید خودکار</span>
+          <span class="pr-page-no">صفحه ۱ از ۲ — ${p.name}</span>
+          <span>تاریخ گزارش: ${faNow}</span>
+        </div>
+      </div>`;
+    }
+
+    function prMsgItem(m, type) {
+      const scoreClr = type === "positive" ? "#059669" : "#dc2626";
+      return `
+      <div class="pr-msg">
+        <div class="pr-msg-text">${m.text}</div>
+        ${m.key_point ? `<div class="pr-msg-kp"><i class="fas fa-quote-right"></i><span>${faText(m.key_point)}</span></div>` : ""}
+        <div class="pr-msg-foot">
+          ${(m.topics || []).slice(0, 2).map(t => `<span class="pr-msg-chip">${t}</span>`).join("")}
+          ${m.reactions ? `<span style="color:#7c3aed;font-weight:700;"><i class="fas fa-face-smile-beam"></i> ${faNum(m.reactions)}</span>` : ""}
+          <span>${faDate(m.date)}</span>
+          <span class="pr-msg-score" style="color:${scoreClr};">امتیاز: ${faNum(Math.round((m.sentiment_score || 0) * 100), { signed: true })}</span>
+        </div>
+      </div>`;
+    }
+
+    function buildPrintPage2(p) {
+      const topics = p.topics || [];
+      const sevList = p.high_severity_messages || [];
+      const posList = (p.top_positive_messages || []).slice(0, 3);
+      const negList = (p.top_negative_messages || []).slice(0, 3);
+
+      const severityRows = sevList.map(m => `
+        <tr>
+          <td style="text-align:center;">${m.severity === "high" ? '<span class="pr-pill prp-red">بالا</span>' : '<span class="pr-pill prp-amber">متوسط</span>'}</td>
+          <td style="text-align:center;">${sentimentFa(m.sentiment)}</td>
+          <td>${m.text}</td>
+          <td style="text-align:center;white-space:nowrap;">${faDate(m.date)}</td>
+        </tr>`).join("");
+
+      return `
+      <div class="pr-page">
+        <div class="pr-banner pr-banner-sm">
+          <div class="pr-brand">
+            <span>${p.name}</span>
+            <small>پیوست: نظرات برجسته دانشجویان (اصل نظر + تفسیر)، موضوعات پرتکرار، موارد جدی و راهنمای گزارش</small>
+          </div>
+          <div class="pr-banner-left">استادسنج — صفحهٔ پیوست</div>
+        </div>
+
+        <div class="pr-main">
+          <div class="pr-col">
+            <div class="pr-section pr-flex">
+              <div class="pr-section-head"><i class="fas fa-thumbs-up" style="color:#059669;"></i> مثبت‌ترین نظرات دانشجویان <span class="pr-head-note">اصل نظر + تفسیر هوشمند</span></div>
+              <div class="pr-section-body" style="padding:0;">
+                ${posList.length ? posList.map(m => prMsgItem(m, "positive")).join("") : '<div style="padding:8px;text-align:center;color:#94a3b8;">موردی ثبت نشده است.</div>'}
+              </div>
+            </div>
+            <div class="pr-section pr-flex">
+              <div class="pr-section-head"><i class="fas fa-thumbs-down" style="color:#dc2626;"></i> منفی‌ترین نظرات دانشجویان <span class="pr-head-note">اصل نظر + تفسیر هوشمند</span></div>
+              <div class="pr-section-body" style="padding:0;">
+                ${negList.length ? negList.map(m => prMsgItem(m, "negative")).join("") : '<div style="padding:8px;text-align:center;color:#94a3b8;">موردی ثبت نشده است.</div>'}
+              </div>
+            </div>
+          </div>
+
+          <div class="pr-col">
+            <div class="pr-section">
+              <div class="pr-section-head"><i class="fas fa-tags"></i> موضوعات پرتکرار <span class="pr-head-note">${faNum(topics.length)} موضوع</span></div>
+              <div class="pr-section-body">
+                ${topics.length ? `<div class="pr-chips">${topics.map(t => `<span class="pr-chip">${t.topic}<b>${faNum(t.count)}</b></span>`).join("")}</div>` : "موضوعی ثبت نشده است."}
+              </div>
+            </div>
+            <div class="pr-section pr-flex">
+              <div class="pr-section-head"><i class="fas fa-exclamation-circle"></i> موارد جدی (شدت متوسط/بالا) <span class="pr-head-note">${faNum(sevList.length)} مورد — بررسی انسانی الزامی</span></div>
+              <div class="pr-section-body" style="padding:0;">
+                ${sevList.length ? `
+                <table class="pr-table">
+                  <thead><tr><th style="width:40px;">شدت</th><th style="width:50px;">احساس</th><th>متن پیام</th><th style="width:75px;">تاریخ</th></tr></thead>
+                  <tbody>${severityRows}</tbody>
+                </table>` : '<div style="padding:8px;text-align:center;color:#94a3b8;">مورد جدی‌ای برای این استاد ثبت نشده است.</div>'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="pr-foot">
+          <span>استادسنج — پیوست کارنامهٔ ${p.name}</span>
+          <span class="pr-page-no">صفحه ۲ از ۲ — ${p.name}</span>
+          <span>راهنما: صفحهٔ پایانی</span>
+        </div>
+      </div>`;
+    }
+
+    async function buildGroupPrintReport() {
+      const dept = document.getElementById("grpDept").value;
+      const onlyEnough = document.getElementById("grpEnough").checked;
+      const progress = document.getElementById("grpProgress");
+      const goBtn = document.getElementById("grpGo");
+
+      let list = [...allProfessors];
+      if (dept !== "__all__") list = list.filter(p => p.department === dept);
+      if (onlyEnough) list = list.filter(p => p.has_enough_data);
+      list.sort((a, b) => {
+        const av = getRankValue(a), bv = getRankValue(b);
+        const an = (av === null || av === undefined) ? -9999 : av;
+        const bn = (bv === null || bv === undefined) ? -9999 : bv;
+        return bn - an;
+      });
+
+      if (!list.length) { ui.showAlert("استادی با این فیلترها یافت نشد.", "warn"); return; }
+
+      goBtn.disabled = true;
+      const sections = [];
+      try {
+        const W = 560, H = 450;
+        for (let i = 0; i < list.length; i++) {
+          progress.textContent = `در حال ساخت کارنامه ${i + 1} از ${list.length}: ${list[i].name} …`;
+          const p = await api.getProfessorProfile(list[i].id);
+          const imgs = {
+            sentiment: captureForPrint(buildSentimentChart, W, H, p),
+            radar: captureForPrint(buildRadarChart, W, H, p),
+            aspects: captureForPrint(buildAspectsChart, W, H, p),
+            timeline: captureForPrint(buildTimelineChart, W, H, p)
+          };
+          const b = bayesMap[p.id];
+          sections.push(buildPrintPage1(p, imgs, b ? b.position : (i + 1), b ? b.total : list.length));
+          sections.push(buildPrintPage2(p));
+          await new Promise(r => setTimeout(r, 0));
+        }
+      } catch (e) {
+        ui.showAlert("خطا در ساخت گزارش: " + e.message, "danger");
+        goBtn.disabled = false;
+        return;
+      }
+
+      const html = sections.join("") + notesHtml();
+      document.getElementById("modalRoot").innerHTML = "";
+      insertAndPrint(html, makeGroupFileName(dept, list.length, onlyEnough));
+    }
+
+    document.getElementById("printBtn").addEventListener("click", buildPrintReport);
+    document.getElementById("groupPrintBtn").addEventListener("click", openGroupModal);
+    document.getElementById("searchInput").addEventListener("input", e => { state.search = e.target.value; renderTable(); });
+    document.getElementById("sortSelect").addEventListener("change", e => { state.sort = e.target.value; renderTable(); });
+    document.getElementById("filterSelect").addEventListener("change", e => { state.filter = e.target.value; renderTable(); });
+
+    window.editProfessor = async function(id) {
+      const prof = allProfessors.find(p => p.id === id);
+      if (!prof) return;
+      const newName = prompt("نام جدید استاد:", prof.name);
+      if (newName === null || newName.trim() === "") return;
+      try {
+        await api.put(`/api/professors/${id}`, { name: newName.trim(), department: prof.department, aliases: prof.aliases || [] });
+        ui.showAlert("نام استاد به‌روزرسانی شد.", "success");
+        loadRanking();
+      } catch (err) { ui.showAlert("خطا: " + err.message, "danger"); }
+    };
+
+    window.deleteProfessor = async function(id) {
+      const prof = allProfessors.find(p => p.id === id);
+      if (!prof) return;
+      if (!confirm(`استاد «${prof.name}» و همه تحلیل‌های مرتبط حذف شوند؟`)) return;
+      try {
+        await api.deleteProfessor(id);
+        ui.showAlert("استاد حذف شد.", "success");
+        loadRanking();
+      } catch (err) { ui.showAlert("خطا: " + err.message, "danger"); }
+    };
+
+    loadRanking();
+  </script>
+</body>
+</html>

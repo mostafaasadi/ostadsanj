@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>استادسنج — پیام‌ها و تطبیق‌ها</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <link rel="stylesheet" href="assets/css/app.css">
+  <style>
+    input, select, button { font-family: inherit; }
+    .ms-page { display: flex; flex-direction: column; gap: 1.25rem; }
+    .hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 60%, #a855f7 100%);
+      color: #fff; border-radius: 1.1rem; padding: 1.5rem 1.75rem;
+      display: flex; justify-content: space-between; align-items: center;
+      gap: 1rem; flex-wrap: wrap;
+      box-shadow: 0 10px 30px -12px rgba(124, 58, 237, .5);
+    }
+    .hero h1 { font-size: 1.3rem; font-weight: 800; margin: 0 0 .4rem 0; }
+    .hero p { margin: 0; opacity: .9; font-size: .85rem; line-height: 1.9; }
+    .hero-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
+    .ghost-btn {
+      background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35);
+      color: #fff; border-radius: .7rem; padding: .55rem 1rem;
+      font-size: .85rem; font-weight: 600; cursor: pointer; transition: background .15s;
+      display: inline-flex; align-items: center; gap: .45rem;
+    }
+    .ghost-btn:hover { background: rgba(255,255,255,.25); }
+    .tabs-bar { display: flex; gap: .5rem; background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; padding: .5rem; }
+    .tab-btn {
+      flex: 1; display: flex; align-items: center; justify-content: center; gap: .55rem;
+      padding: .75rem 1rem; border: none; background: none; border-radius: .7rem;
+      font-size: .92rem; font-weight: 800; color: #64748b; cursor: pointer; transition: all .15s;
+    }
+    .tab-btn:hover { background: #f8fafc; }
+    .tab-btn.active { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: #fff; box-shadow: 0 6px 16px -6px rgba(79,70,229,.5); }
+    .tab-count { background: #fffbeb; color: #b45309; border-radius: 999px; padding: .05rem .6rem; font-size: .76rem; font-weight: 800; }
+    .tab-btn.active .tab-count { background: rgba(255,255,255,.22); color: #fff; }
+    .toolbar {
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem;
+      padding: 1rem 1.25rem; display: flex; flex-wrap: wrap; align-items: flex-end; gap: .9rem;
+    }
+    .field { display: flex; flex-direction: column; gap: .4rem; }
+    .field > label { font-size: .75rem; font-weight: 700; color: #64748b; }
+    .field .form-control { text-align: right; }
+    .field-grow { flex: 1; }
+    .dd { position: relative; }
+    .dd-btn {
+      width: 100%; display: flex; justify-content: space-between; align-items: center; gap: .6rem;
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: .7rem;
+      padding: .6rem .9rem; font-size: .88rem; font-weight: 700; color: #0f172a; cursor: pointer; text-align: right;
+    }
+    .dd-btn:hover { background: #f8fafc; }
+    .dd-btn i { color: #94a3b8; font-size: .72rem; transition: transform .15s; }
+    .dd.open .dd-btn i { transform: rotate(180deg); }
+    .dd-panel {
+      position: absolute; top: calc(100% + 6px); right: 0; left: 0; z-index: 80;
+      background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: .8rem;
+      box-shadow: 0 16px 40px -12px rgba(15,23,42,.25);
+      display: none; max-height: 330px; overflow: auto; padding: .35rem;
+    }
+    .dd.open .dd-panel { display: block; }
+    .dd-item { padding: .55rem .8rem; border-radius: .6rem; cursor: pointer; }
+    .dd-item:hover { background: #f1f5f9; }
+    .dd-item.active { background: #f5f3ff; }
+    .dd-item b { display: block; font-size: .86rem; color: #0f172a; }
+    .dd-item span { font-size: .72rem; color: #94a3b8; }
+    .table-card { background: #fff; border: 1px solid var(--border, #e2e8f0); border-radius: 1rem; overflow: hidden; }
+    .card-head-x {
+      padding: .95rem 1.25rem; border-bottom: 1px solid var(--border, #e2e8f0);
+      display: flex; justify-content: space-between; align-items: center; gap: .75rem;
+      font-weight: 800; font-size: .92rem; color: #1e293b;
+    }
+    .card-head-x i { color: #7c3aed; margin-left: .45rem; }
+    .table-scroll { overflow-x: auto; }
+    table.msg-table { width: 100%; border-collapse: separate; border-spacing: 0; direction: rtl; }
+    .msg-table thead th {
+      background: #f8fafc; color: #475569; font-size: .76rem; font-weight: 800;
+      text-align: right; padding: .85rem 1.1rem; border-bottom: 1px solid var(--border, #e2e8f0); white-space: nowrap;
+    }
+    .msg-table tbody td { padding: .85rem 1.1rem; border-bottom: 1px solid #f1f5f9; text-align: right; vertical-align: top; font-size: .85rem; color: #1e293b; }
+    .msg-table tbody tr:last-child td { border-bottom: none; }
+    .msg-table tbody tr:hover { background: #f8fafc; }
+    .msg-table tbody tr.sel { background: #f5f3ff; }
+    .msg-table tbody tr.sel:hover { background: #ede9fe; }
+    .msg-table input[type="checkbox"] { width: 16px; height: 16px; accent-color: #7c3aed; cursor: pointer; }
+    .txt { line-height: 1.9; max-width: 460px; }
+    .chain-toggle {
+      border: none; background: #eef2ff; color: #4338ca; border-radius: .5rem;
+      padding: .22rem .65rem; font-size: .72rem; font-weight: 700; cursor: pointer;
+      margin-bottom: .45rem; display: inline-flex; align-items: center; gap: .35rem;
+    }
+    .chain-toggle:hover { background: #e0e7ff; }
+    .chain-box {
+      margin: 0 0 .55rem; border-right: 3px solid #c7d2fe; background: #f8fafc;
+      border-radius: .5rem; padding: .55rem .75rem; display: flex; flex-direction: column; gap: .45rem;
+      max-width: 460px;
+    }
+    .chain-item { font-size: .78rem; color: #64748b; line-height: 1.8; }
+    .chain-item.chain-parent { color: #334155; font-weight: 600; background: #eef2ff; border-radius: .4rem; padding: .3rem .5rem; }
+    .chain-lbl { display: block; font-size: .66rem; font-weight: 800; color: #7c3aed; margin-bottom: .1rem; }
+    .badge-pill { display: inline-flex; align-items: center; gap: .4rem; padding: .24rem .7rem; border-radius: 999px; font-size: .72rem; font-weight: 700; white-space: nowrap; }
+    .badge-pill .dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .bp-green { background: #ecfdf5; color: #047857; } .bp-green .dot { background: #10b981; }
+    .bp-red { background: #fef2f2; color: #b91c1c; } .bp-red .dot { background: #ef4444; }
+    .bp-amber { background: #fffbeb; color: #b45309; } .bp-amber .dot { background: #f59e0b; }
+    .bp-slate { background: #f1f5f9; color: #475569; } .bp-slate .dot { background: #94a3b8; }
+    .bp-violet { background: #f5f3ff; color: #6d28d9; } .bp-violet .dot { background: #8b5cf6; }
+    .bp-blue { background: #eff6ff; color: #1d4ed8; } .bp-blue .dot { background: #2563eb; }
+    .kp { color: #6d28d9; font-weight: 700; font-size: .78rem; margin-top: .3rem; line-height: 1.8; }
+    .chips { display: flex; gap: .3rem; flex-wrap: wrap; margin-top: .3rem; }
+    .chip { background: #f1f5f9; color: #475569; padding: .1rem .5rem; border-radius: .5rem; font-size: .68rem; }
+    .review-actions { display: flex; gap: .35rem; margin-top: .45rem; }
+    .rev-note {
+      margin: 1rem 1.25rem 0 1.25rem; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af;
+      border-radius: .8rem; padding: .8rem 1rem; font-size: .8rem; line-height: 2;
+      display: flex; gap: .6rem; align-items: flex-start;
+    }
+    .rev-note i { margin-top: .35rem; color: #2563eb; }
+    .rev-toolbar {
+      padding: .8rem 1.25rem; display: flex; gap: .8rem; align-items: center; flex-wrap: wrap;
+      border-bottom: 1px solid var(--border, #e2e8f0); background: #fffbeb;
+    }
+    .btn-x {
+      display: inline-flex; align-items: center; gap: .5rem;
+      border-radius: .75rem; padding: .6rem 1.2rem;
+      font-size: .85rem; font-weight: 700; cursor: pointer; transition: all .15s; border: 1px solid transparent;
+    }
+    .btn-x.sm { padding: .35rem .75rem; font-size: .76rem; border-radius: .65rem; }
+    .btn-ok { background: #059669; color: #fff; }
+    .btn-ok:hover { background: #047857; }
+    .btn-no { background: #dc2626; color: #fff; }
+    .btn-no:hover { background: #b91c1c; }
+    .btn-outline-x { background: #fff; color: #334155; border-color: var(--border, #e2e8f0); }
+    .btn-outline-x:hover { background: #f8fafc; }
+    .btn-primary-x { background: #4f46e5; color: #fff; }
+    .btn-primary-x:hover { background: #4338ca; }
+    .btn-x:disabled { opacity: .5; cursor: not-allowed; }
+    .pager { display: flex; align-items: center; gap: .7rem; padding: .85rem 1.25rem; border-top: 1px solid var(--border, #e2e8f0); font-size: .8rem; color: #64748b; flex-wrap: wrap; }
+    .empty-state { padding: 3rem 1rem; text-align: center; color: #94a3b8; }
+    .empty-state i { font-size: 2.2rem; margin-bottom: .8rem; display: block; color: #cbd5e1; }
+    .empty-state p { margin: 0; font-size: .88rem; line-height: 2; }
+    .modal-backdrop { position: fixed; inset: 0; background: rgba(15,23,42,.55); display: flex; align-items: center; justify-content: center; z-index: 1000; }
+    .modal-box { background: #fff; border-radius: 1rem; padding: 1.5rem; width: min(460px, 92vw); box-shadow: 0 20px 50px rgba(0,0,0,.35); }
+    .modal-title { font-weight: 800; font-size: 1rem; color: #1e293b; margin-bottom: 1rem; display: flex; align-items: center; gap: .5rem; }
+    .modal-title i { color: #7c3aed; }
+    .modal-field { margin-bottom: .9rem; }
+    .modal-field > label { display: block; font-size: .75rem; font-weight: 700; color: #64748b; margin-bottom: .4rem; }
+    .radio-line, .check-line { display: flex; align-items: center; gap: .55rem; font-size: .85rem; font-weight: 600; color: #334155; margin-bottom: .45rem; }
+    .modal-actions { display: flex; gap: .6rem; justify-content: flex-end; margin-top: 1.2rem; }
+    .ltr-num { direction: ltr; unicode-bidi: isolate; display: inline-block; }
+    .rp-prof-section { margin-bottom: 4mm; }
+    .rp-prof-header {
+      background: #eef2ff; border-right: 4px solid #7c3aed; border-radius: 4px;
+      padding: 4px 8px; margin-bottom: 2mm; display: flex; justify-content: space-between; align-items: center;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+    .rp-prof-name { font-size: 11px; font-weight: 800; color: #3730a3; }
+    .rp-prof-dept { font-size: 8px; color: #64748b; margin-top: 1px; }
+    .rp-prof-stats { font-size: 8px; color: #475569; font-weight: 600; }
+    .rp-table { width: 100%; border-collapse: collapse; font-size: 8px; color: #111; }
+    .rp-table th {
+      background: #4338ca; color: #fff; font-weight: 800; padding: 3px 5px;
+      text-align: right; font-size: 7.5px; border: 1px solid #3730a3;
+    }
+    .rp-table td { padding: 3px 5px; border: 1px solid #d3d8e0; vertical-align: top; line-height: 1.5; }
+    .rp-table tbody tr:nth-child(even) td { background: #f8fafc; }
+    .rp-table tbody tr { break-inside: avoid; page-break-inside: avoid; }
+    .rp-msg-text { font-size: 8px; line-height: 1.6; color: #1e293b; }
+    .rp-chain {
+      margin: 2px 0; padding-right: 6px; border-right: 2px solid #c7d2fe;
+      font-size: 7px; color: #64748b; line-height: 1.5;
+    }
+    .rp-chain-item { margin-bottom: 2px; }
+    .rp-chain-item:last-child { font-weight: 600; color: #4338ca; background: #eef2ff; padding: 1px 3px; border-radius: 2px; }
+    .rp-chain-lbl { font-size: 6px; font-weight: 700; color: #7c3aed; display: block; }
+    .rp-decision { font-size: 7.5px; line-height: 1.6; }
+    .rp-pill {
+      display: inline-block; border-radius: 8px; padding: 1px 4px;
+      font-size: 7px; font-weight: 700; margin-left: 2px;
+    }
+    .rpp-green { background: #d1fae5; color: #065f46; }
+    .rpp-red { background: #fee2e2; color: #991b1b; }
+    .rpp-slate { background: #e2e8f0; color: #334155; }
+    .rpp-amber { background: #fef3c7; color: #92400e; }
+    .rpp-violet { background: #ede9fe; color: #5b21b6; }
+    .rp-kp { color: #6d28d9; font-weight: 700; font-size: 7px; margin-top: 2px; }
+    .rp-topics { margin-top: 2px; }
+    .rp-topic-tag {
+      background: #f1f5f9; border-radius: 3px; padding: 0 3px;
+      font-size: 6.5px; color: #475569; margin-left: 2px; display: inline-block;
+    }
+    .rp-footer {
+      margin-top: 4mm; padding-top: 2mm; border-top: 1px solid #d3d8e0;
+      font-size: 7px; color: #64748b; display: flex; justify-content: space-between;
+    }
+    .rp-report-hero {
+      background: linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #a855f7 100%);
+      color: #fff; border-radius: 6px; padding: 6px 10px;
+      display: flex; justify-content: space-between; align-items: center; margin-bottom: 4mm;
+      break-inside: avoid; page-break-inside: avoid;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="modalRoot"></div>
+
+  <script src="assets/js/api.js"></script>
+  <script src="assets/js/ui.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script>
+    const content = layout.init("messages");
+    let professors = [];
+    let DATA = [];
+    let state = { profId: null, method: "all", page: 1, pageSize: 50 };
+    const REVIEW = { items: [], filterProf: "all", selected: new Set() };
+    let ddProf = null, ddMethod = null, ddRevProf = null;
+    const METHOD_FA = { exact: "نام دقیق", hashtag: "هشتگ", reply_context: "زنجیره ریپلای" };
+    const METHOD_ITEMS = [
+      { value: "all", label: "همه روش‌ها" },
+      { value: "exact", label: "نام دقیق" },
+      { value: "hashtag", label: "هشتگ" },
+      { value: "reply_context", label: "زنجیره ریپلای" }
+    ];
+
+    content.innerHTML = `
+      <div class="ms-page">
+        <div class="hero">
+          <div>
+            <h1><i class="fas fa-messages"></i> پیام‌ها و تطبیق‌ها</h1>
+            <p>استادسنج | مرور پیام‌های هر استاد همراه با تصمیم تحلیل، زنجیره پاسخ و بازبینی تطبیق‌های ریپلای</p>
+          </div>
+          <div class="hero-actions">
+            <button class="ghost-btn" id="revJump"><i class="fas fa-clipboard-check"></i> صف بازبینی (<span id="revHeroCount">۰</span>)</button>
+            <button class="ghost-btn" id="reportBtn"><i class="fas fa-file-pdf"></i> دانلود PDF به تفکیک استاد</button>
+          </div>
+        </div>
+        <div id="alertArea"></div>
+        <div class="tabs-bar">
+          <button class="tab-btn active" id="tabBtnList" type="button"><i class="fas fa-list"></i> لیست پیام‌ها</button>
+          <button class="tab-btn" id="tabBtnReview" type="button"><i class="fas fa-clipboard-check"></i> صف بازبینی <span class="tab-count" id="revTabCount">۰</span></button>
+        </div>
+        <div id="tabList">
+          <div class="toolbar">
+            <div class="field field-grow">
+              <label>استاد</label>
+              <div id="ddProfMount"></div>
+            </div>
+            <div class="field" style="min-width:200px;">
+              <label>روش تطبیق</label>
+              <div id="ddMethodMount"></div>
+            </div>
+          </div>
+          <div class="table-card">
+            <div class="table-scroll" id="msgBox"></div>
+            <div class="pager">
+              <button class="btn-x btn-outline-x sm" id="prevBtn"><i class="fas fa-chevron-right"></i> قبلی</button>
+              <span id="pageInfo"></span>
+              <button class="btn-x btn-outline-x sm" id="nextBtn">بعدی <i class="fas fa-chevron-left"></i></button>
+            </div>
+          </div>
+        </div>
+        <div id="tabReview" style="display:none;">
+          <div class="table-card">
+            <div class="card-head-x">
+              <span><i class="fas fa-clipboard-check"></i>صف بازبینی تطبیق‌های ریپلای</span>
+              <span class="badge-pill bp-amber"><span class="dot"></span><span id="revCountBadge">۰</span> مورد در انتظار</span>
+            </div>
+            <div class="rev-note">
+              <i class="fas fa-circle-info"></i>
+              <span>
+                <b>تأیید</b> یعنی این ریپلای واقعاً دربارهٔ همین استاد است؛ لینک قطعی می‌شود و تحلیلِ موجودِ آن وارد آمار، امتیاز و کارنامهٔ استاد می‌شود (به شرط حداقل ۲۵ کاراکتر).
+                <b>رد</b> یعنی لینک اشتباه بوده (احوال‌پرسی، بی‌ربط، استاد دیگر)؛ لینک غیرفعال و تحلیل آن حذف می‌شود تا هرگز آمار را آلوده نکند.
+                برای قضاوت، دکمهٔ <b>«زنجیرهٔ پاسخ»</b> هر پیام را بزن تا ببینی در پاسخ به چه پیامی نوشته شده است.
+                این تصمیم دربارهٔ <b>صحت انتساب</b> است، نه مثبت/منفی بودن نظر.
+              </span>
+            </div>
+            <div class="rev-toolbar">
+              <div style="min-width:240px;" id="ddRevProfMount"></div>
+              <span id="revInfo" style="font-size:.78rem;color:#64748b;font-weight:600;"></span>
+              <span style="margin-right:auto;display:flex;gap:.5rem;flex-wrap:wrap;">
+                <button class="btn-x btn-ok sm" id="revApproveBtn" disabled><i class="fas fa-check"></i> تأیید انتخاب‌شده‌ها</button>
+                <button class="btn-x btn-no sm" id="revRejectBtn" disabled><i class="fas fa-xmark"></i> رد انتخاب‌شده‌ها</button>
+              </span>
+            </div>
+            <div class="table-scroll" id="revBox"></div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    function faText(s) {
+      if (!s) return "";
+      return String(s).replace(/([+-]?\d+(?:\.\d+)?)/g, (tok) => {
+        const sign = (tok[0] === "+" || tok[0] === "-") ? tok[0] : "";
+        const num = sign ? tok.slice(1) : tok;
+        const fa = num.replace(/\d/g, d => "۰۱۲۳۴۵۶۷۸۹"[d]).replace(".", "٫");
+        return sign ? `<span class="ltr-num">${sign}${fa}</span>` : fa;
+      });
+    }
+
+    function createDropdown(mountId, opts) {
+      const mount = document.getElementById(mountId);
+      mount.classList.add("dd");
+      mount.innerHTML = `
+        <button type="button" class="dd-btn"><span class="dd-label"></span><i class="fas fa-chevron-down"></i></button>
+        <div class="dd-panel"><div class="dd-list"></div></div>`;
+      const btn = mount.querySelector(".dd-btn");
+      const label = mount.querySelector(".dd-label");
+      const list = mount.querySelector(".dd-list");
+      function render() {
+        const items = opts.items();
+        const cur = String(opts.value());
+        const curItem = items.find(i => String(i.value) === cur);
+        label.textContent = curItem ? curItem.label : (opts.placeholder || "انتخاب…");
+        list.innerHTML = items.map(i => `
+          <div class="dd-item ${String(i.value) === cur ? "active" : ""}" data-v="${i.value}">
+            <b>${i.label}</b>${i.sub ? `<span>${i.sub}</span>` : ""}
+          </div>`).join("");
+        list.querySelectorAll(".dd-item").forEach(el => {
+          el.addEventListener("click", (e) => {
+            e.stopPropagation();
+            opts.onChange(el.dataset.v);
+            mount.classList.remove("open");
+            render();
+          });
+        });
+      }
+      btn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        mount.classList.toggle("open");
+        if (mount.classList.contains("open")) render();
+      });
+      document.addEventListener("click", () => mount.classList.remove("open"));
+      render();
+      return { refresh: render };
+    }
+
+    function switchTab(name) {
+      document.getElementById("tabBtnList").classList.toggle("active", name === "list");
+      document.getElementById("tabBtnReview").classList.toggle("active", name === "review");
+      document.getElementById("tabList").style.display = name === "list" ? "" : "none";
+      document.getElementById("tabReview").style.display = name === "review" ? "" : "none";
+    }
+
+    function sentimentBadge(s) {
+      if (s === "positive") return '<span class="badge-pill bp-green"><span class="dot"></span>مثبت</span>';
+      if (s === "negative") return '<span class="badge-pill bp-red"><span class="dot"></span>منفی</span>';
+      if (s === "mixed") return '<span class="badge-pill bp-amber"><span class="dot"></span>مختلط</span>';
+      return '<span class="badge-pill bp-slate"><span class="dot"></span>خنثی</span>';
+    }
+
+    function methodBadge(m) {
+      if (m === "exact") return '<span class="badge-pill bp-blue"><span class="dot"></span>نام دقیق</span>';
+      if (m === "hashtag") return '<span class="badge-pill bp-violet"><span class="dot"></span>هشتگ</span>';
+      return '<span class="badge-pill bp-slate"><span class="dot"></span>ریپلای</span>';
+    }
+
+    function reviewBadge(row) {
+      if (row.needs_review) return '<span class="badge-pill bp-amber"><span class="dot"></span>در انتظار بازبینی</span>';
+      if (row.approved === true) return '<span class="badge-pill bp-green"><span class="dot"></span>تأییدشده</span>';
+      if (row.approved === false) return '<span class="badge-pill bp-red"><span class="dot"></span>ردشده</span>';
+      return '<span class="badge-pill bp-slate"><span class="dot"></span>بدون نیاز</span>';
+    }
+
+    function chainHtml(row, forPrint) {
+      if (!row.chain || !row.chain.length) return "";
+      if (forPrint) {
+        return `<div class="rp-chain">${row.chain.map((c, i) => `
+          <div class="rp-chain-item">
+            <span class="rp-chain-lbl">${i === row.chain.length - 1 ? "پاسخ به:" : "بالاتر:"} ${c.date || ""}</span>
+            ${c.text}
+          </div>`).join("")}</div>`;
+      }
+      const id = `chain-${row.message_id}-${row.professor_id || 0}`;
+      return `
+        <button type="button" class="chain-toggle" data-target="${id}"><i class="fas fa-comments"></i> زنجیرهٔ پاسخ (${faNumber.format(row.chain.length)})</button>
+        <div class="chain-box" id="${id}" style="display:none;">
+          ${row.chain.map((c, i) => `
+            <div class="chain-item ${i === row.chain.length - 1 ? "chain-parent" : ""}">
+              <span class="chain-lbl">${i === row.chain.length - 1 ? "پاسخ به این پیام:" : "پیام بالاتر:"} ${c.date || ""}</span>
+              ${c.text}
+            </div>`).join("")}
+        </div>`;
+    }
+
+    function bindChainToggles(scope) {
+      scope.querySelectorAll(".chain-toggle").forEach(b => {
+        b.addEventListener("click", () => {
+          const t = document.getElementById(b.dataset.target);
+          if (!t) return;
+          const open = t.style.display !== "none";
+          t.style.display = open ? "none" : "flex";
+          b.innerHTML = open
+            ? `<i class="fas fa-comments"></i> زنجیرهٔ پاسخ`
+            : `<i class="fas fa-eye-slash"></i> بستن زنجیره`;
+        });
+      });
+    }
+
+    function decisionHtml(row, forPrint) {
+      const a = row.analysis;
+      if (!a) {
+        return forPrint
+          ? `<span class="rp-pill rpp-slate">بدون تحلیل</span>`
+          : `<span class="badge-pill bp-slate"><span class="dot"></span>بدون تحلیل (رد شده)</span>`;
+      }
+      if (!a.is_relevant) {
+        return forPrint
+          ? `<span class="rp-pill rpp-slate">غیرمرتبط</span>`
+          : `<span class="badge-pill bp-slate"><span class="dot"></span>غیرمرتبط</span>`;
+      }
+      const score = Math.round((a.sentiment_score || 0) * 100);
+      if (forPrint) {
+        const cls = a.sentiment === "positive" ? "rpp-green" : a.sentiment === "negative" ? "rpp-red" : a.sentiment === "mixed" ? "rpp-amber" : "rpp-slate";
+        const faS = { positive: "مثبت", negative: "منفی", mixed: "مختلط", neutral: "خنثی" }[a.sentiment] || a.sentiment;
+        const pills = [`<span class="rp-pill ${cls}">${faS} ${faNumber.format(score)}</span>`];
+        pills.push(`<span class="rp-pill ${a.contains_opinion ? "rpp-violet" : "rpp-slate"}">${a.contains_opinion ? "نظر" : "بدون نظر"}</span>`);
+        if (a.severity === "medium" || a.severity === "high") pills.push(`<span class="rp-pill rpp-red">شدت: ${a.severity === "high" ? "بالا" : "متوسط"}</span>`);
+        const extra = `${a.key_point ? `<div class="rp-kp">${faText(a.key_point)}</div>` : ""}${(a.topics || []).length ? `<div class="rp-topics">${a.topics.slice(0, 3).map(t => `<span class="rp-topic-tag">${t}</span>`).join("")}</div>` : ""}`;
+        return `<div class="rp-decision">${pills.join(" ")}${extra}</div>`;
+      }
+      const html = [`<div style="display:flex;gap:.35rem;flex-wrap:wrap;">${sentimentBadge(a.sentiment)}<span class="badge-pill bp-slate"><span class="dot"></span>امتیاز: ${faNumber.format(score)}</span><span class="badge-pill ${a.contains_opinion ? "bp-violet" : "bp-slate"}"><span class="dot"></span>${a.contains_opinion ? "نظر" : "بدون نظر"}</span>${(a.severity === "medium" || a.severity === "high") ? `<span class="badge-pill bp-red"><span class="dot"></span>شدت: ${a.severity === "high" ? "بالا" : "متوسط"}</span>` : ""}</div>`];
+      if (a.key_point) html.push(`<div class="kp">${faText(a.key_point)}</div>`);
+      if ((a.topics || []).length) html.push(`<div class="chips">${a.topics.slice(0, 4).map(t => `<span class="chip">${t}</span>`).join("")}</div>`);
+      return html.join("");
+    }
+
+    async function loadProfessors() {
+      try {
+        professors = await api.get("/api/professors");
+        if (professors.length) {
+          state.profId = professors[0].id;
+          ddProf.refresh();
+          loadReport();
+        } else {
+          document.getElementById("msgBox").innerHTML = '<div class="empty-state"><i class="fas fa-users-slash"></i><p>استادی ثبت نشده است.</p></div>';
+        }
+      } catch (e) {
+        ui.showAlert("خطا در بارگذاری اساتید: " + e.message, "danger");
+      }
+    }
+
+    async function loadReport() {
+      const box = document.getElementById("msgBox");
+      box.innerHTML = '<div class="empty-state"><i class="fas fa-spinner fa-spin"></i><p>در حال بارگذاری…</p></div>';
+      try {
+        const res = await api.get(`/api/professors/${state.profId}/messages-report`);
+        DATA = res.messages || [];
+        state.page = 1;
+        renderTable();
+      } catch (e) {
+        box.innerHTML = `<div class="empty-state"><i class="fas fa-triangle-exclamation"></i><p>خطا: ${e.message}</p></div>`;
+      }
+    }
+
+    function filteredRows() {
+      if (state.method === "all") return DATA;
+      return DATA.filter(r => r.match_method === state.method);
+    }
+
+    function renderTable() {
+      const box = document.getElementById("msgBox");
+      const rows = filteredRows();
+      const pages = Math.max(1, Math.ceil(rows.length / state.pageSize));
+      if (state.page > pages) state.page = pages;
+      const slice = rows.slice((state.page - 1) * state.pageSize, state.page * state.pageSize);
+      document.getElementById("pageInfo").textContent = `صفحه ${faNumber.format(state.page)} از ${faNumber.format(pages)} — ${faNumber.format(rows.length)} پیام`;
+      document.getElementById("prevBtn").disabled = state.page <= 1;
+      document.getElementById("nextBtn").disabled = state.page >= pages;
+      if (!slice.length) {
+        box.innerHTML = '<div class="empty-state"><i class="fas fa-inbox"></i><p>پیامی با این فیلتر یافت نشد.</p></div>';
+        return;
+      }
+      box.innerHTML = `
+        <table class="msg-table">
+          <thead>
+            <tr>
+              <th style="width:110px;">تاریخ</th>
+              <th>متن پیام</th>
+              <th style="width:70px;">واکنش</th>
+              <th style="width:110px;">روش تطبیق</th>
+              <th style="width:190px;">بازبینی تطبیق</th>
+              <th style="width:280px;">تصمیم تحلیل</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${slice.map(r => `
+              <tr>
+                <td style="white-space:nowrap;font-size:.78rem;color:#64748b;">${r.date || "-"}</td>
+                <td>
+                  ${chainHtml(r, false)}
+                  <div class="txt">${r.text}</div>
+                </td>
+                <td style="text-align:center;">${r.reactions ? faNumber.format(Object.values(r.reactions).reduce((a, b) => a + b, 0)) : "-"}</td>
+                <td>${methodBadge(r.match_method)}</td>
+                <td>
+                  ${reviewBadge(r)}
+                  ${r.needs_review ? `
+                    <div class="review-actions">
+                      <button class="btn-x btn-ok sm" onclick="reviewMatch(${r.message_id}, true)"><i class="fas fa-check"></i> تأیید تطبیق</button>
+                      <button class="btn-x btn-no sm" onclick="reviewMatch(${r.message_id}, false)"><i class="fas fa-xmark"></i> رد</button>
+                    </div>` : ""}
+                </td>
+                <td>${decisionHtml(r, false)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>`;
+      bindChainToggles(box);
+    }
+
+    window.reviewMatch = async function(messageId, approved) {
+      try {
+        const res = await fetch(`${API_BASE}/api/matches/${messageId}/${state.profId}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ approved })
+        });
+        if (!res.ok) throw new Error("http " + res.status);
+        const row = DATA.find(r => r.message_id === messageId);
+        if (row) {
+          row.needs_review = false;
+          row.approved = approved;
+        }
+        ui.showAlert(approved ? "تطبیق تأیید شد." : "تطبیق رد شد.", "success");
+        renderTable();
+        loadPending();
+      } catch (e) {
+        ui.showAlert("خطا در بازبینی: " + e.message, "danger");
+      }
+    };
+
+    function revKey(r) { return r.message_id + ":" + r.professor_id; }
+
+    async function loadPending() {
+      try {
+        const res = await api.get("/api/matches/pending-review");
+        REVIEW.items = res.items || [];
+      } catch (e) {
+        REVIEW.items = [];
+      }
+      const gone = [];
+      REVIEW.selected.forEach(k => {
+        if (!REVIEW.items.some(r => revKey(r) === k)) gone.push(k);
+      });
+      gone.forEach(k => REVIEW.selected.delete(k));
+      document.getElementById("revHeroCount").textContent = faNumber.format(REVIEW.items.length);
+      document.getElementById("revTabCount").textContent = faNumber.format(REVIEW.items.length);
+      document.getElementById("revCountBadge").textContent = faNumber.format(REVIEW.items.length);
+      if (ddRevProf) ddRevProf.refresh();
+      renderReview();
+    }
+
+    function reviewFiltered() {
+      if (REVIEW.filterProf === "all") return REVIEW.items;
+      return REVIEW.items.filter(r => String(r.professor_id) === String(REVIEW.filterProf));
+    }
+
+    function renderReview() {
+      const box = document.getElementById("revBox");
+      const visible = reviewFiltered();
+      document.getElementById("revInfo").textContent =
+        `نمایش: ${faNumber.format(visible.length)} | انتخاب‌شده: ${faNumber.format(REVIEW.selected.size)}`;
+      const apBtn = document.getElementById("revApproveBtn");
+      const rjBtn = document.getElementById("revRejectBtn");
+      apBtn.disabled = REVIEW.selected.size === 0;
+      rjBtn.disabled = REVIEW.selected.size === 0;
+      apBtn.innerHTML = `<i class="fas fa-check"></i> تأیید انتخاب‌شده‌ها (${faNumber.format(REVIEW.selected.size)})`;
+      rjBtn.innerHTML = `<i class="fas fa-xmark"></i> رد انتخاب‌شده‌ها (${faNumber.format(REVIEW.selected.size)})`;
+      if (!visible.length) {
+        box.innerHTML = '<div class="empty-state"><i class="fas fa-circle-check"></i><p>موردی در انتظار بازبینی نیست. 🎉</p></div>';
+        return;
+      }
+      box.innerHTML = `
+        <table class="msg-table">
+          <thead>
+            <tr>
+              <th style="width:40px;text-align:center;"><input type="checkbox" id="revSelectAll"></th>
+              <th style="width:130px;">استاد</th>
+              <th style="width:100px;">تاریخ</th>
+              <th>متن پیام و زنجیره</th>
+              <th style="width:60px;">واکنش</th>
+              <th style="width:260px;">تصمیم تحلیل</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${visible.map(r => `
+              <tr class="${REVIEW.selected.has(revKey(r)) ? "sel" : ""}">
+                <td style="text-align:center;"><input type="checkbox" class="rev-chk" data-key="${revKey(r)}" ${REVIEW.selected.has(revKey(r)) ? "checked" : ""}></td>
+                <td style="font-weight:700;font-size:.82rem;">${r.professor_name}</td>
+                <td style="white-space:nowrap;font-size:.76rem;color:#64748b;">${r.date || "-"}<br><span style="font-size:.68rem;color:#94a3b8;">${faNumber.format(r.char_len)} کاراکتر</span></td>
+                <td>
+                  ${chainHtml(r, false)}
+                  <div class="txt">${r.text}</div>
+                </td>
+                <td style="text-align:center;">${r.reactions ? faNumber.format(Object.values(r.reactions).reduce((a, b) => a + b, 0)) : "-"}</td>
+                <td>${decisionHtml(r, false)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>`;
+      bindChainToggles(box);
+      const visibleKeys = visible.map(revKey);
+      const allChk = document.getElementById("revSelectAll");
+      allChk.checked = visibleKeys.length > 0 && visibleKeys.every(k => REVIEW.selected.has(k));
+      allChk.addEventListener("change", () => {
+        visibleKeys.forEach(k => { if (allChk.checked) REVIEW.selected.add(k); else REVIEW.selected.delete(k); });
+        renderReview();
+      });
+      box.querySelectorAll(".rev-chk").forEach(chk => {
+        chk.addEventListener("change", () => {
+          if (chk.checked) REVIEW.selected.add(chk.dataset.key);
+          else REVIEW.selected.delete(chk.dataset.key);
+          renderReview();
+        });
+      });
+    }
+
+    async function bulkReview(approve) {
+      if (!REVIEW.selected.size) return;
+      const items = [...REVIEW.selected].map(k => {
+        const [mid, pid] = k.split(":").map(Number);
+        return { message_id: mid, professor_id: pid };
+      });
+      const payload = approve ? { approve: items, reject: [] } : { approve: [], reject: items };
+      try {
+        const res = await fetch(`${API_BASE}/api/matches/bulk-review`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("http " + res.status);
+        const data = await res.json();
+        ui.showAlert(
+          approve
+            ? `${faNumber.format(data.approved)} تطبیق تأیید شد؛ نظراتشان از این پس در آمار شمارش می‌شود.`
+            : `${faNumber.format(data.rejected)} تطبیق رد شد و تحلیلشان حذف شد.`,
+          "success"
+        );
+        REVIEW.selected.clear();
+        await loadPending();
+        await loadReport();
+      } catch (e) {
+        ui.showAlert("خطا در بازبینی گروهی: " + e.message, "danger");
+      }
+    }
+
+    function sanitizeFileNamePart(s) {
+      return String(s || "")
+        .replace(/[\\/:*?"<>|]+/g, "-")
+        .replace(/\u200c|\u200f|\u200e/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function makeFileName(base) {
+      const now = new Date();
+      const d = now.toLocaleDateString("fa-IR-u-nu-latn", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-");
+      return `استادسنج-${sanitizeFileNamePart(base)}-${d}`;
+    }
+
+    function insertAndPrint(html, title) {
+      const printWin = window.open("", "_blank", "width=1200,height=800");
+      if (!printWin) {
+        ui.showAlert("لطفاً pop-up blocker مرورگر را برای این سایت غیرفعال کنید.", "danger");
+        return;
+      }
+
+      const css = `
+        @page { size: A4 landscape; margin: 10mm 8mm; }
+        * { box-sizing: border-box; }
+        html, body {
+          background: #fff; font-family: 'Vazirmatn', Tahoma, sans-serif;
+          direction: rtl; margin: 0; padding: 0;
+        }
+        body { padding: 8mm; color: #111; }
+        .rp-prof-section { margin-bottom: 4mm; }
+        .rp-prof-header {
+          background: #eef2ff; border-right: 4px solid #7c3aed; border-radius: 4px;
+          padding: 4px 8px; margin-bottom: 2mm; display: flex; justify-content: space-between; align-items: center;
+          break-inside: avoid; page-break-inside: avoid;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .rp-prof-name { font-size: 11px; font-weight: 800; color: #3730a3; }
+        .rp-prof-dept { font-size: 8px; color: #64748b; margin-top: 1px; }
+        .rp-prof-stats { font-size: 8px; color: #475569; font-weight: 600; }
+        .rp-table { width: 100%; border-collapse: collapse; font-size: 8px; color: #111; }
+        .rp-table th {
+          background: #4338ca; color: #fff; font-weight: 800; padding: 3px 5px;
+          text-align: right; font-size: 7.5px; border: 1px solid #3730a3;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .rp-table td { padding: 3px 5px; border: 1px solid #d3d8e0; vertical-align: top; line-height: 1.5; }
+        .rp-table tbody tr:nth-child(even) td { background: #f8fafc; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rp-table tbody tr { break-inside: avoid; page-break-inside: avoid; }
+        .rp-msg-text { font-size: 8px; line-height: 1.6; color: #1e293b; }
+        .rp-chain {
+          margin: 2px 0; padding-right: 6px; border-right: 2px solid #c7d2fe;
+          font-size: 7px; color: #64748b; line-height: 1.5;
+        }
+        .rp-chain-item { margin-bottom: 2px; }
+        .rp-chain-item:last-child { font-weight: 600; color: #4338ca; background: #eef2ff; padding: 1px 3px; border-radius: 2px; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rp-chain-lbl { font-size: 6px; font-weight: 700; color: #7c3aed; display: block; }
+        .rp-decision { font-size: 7.5px; line-height: 1.6; }
+        .rp-pill {
+          display: inline-block; border-radius: 8px; padding: 1px 4px;
+          font-size: 7px; font-weight: 700; margin-left: 2px;
+        }
+        .rpp-green { background: #d1fae5; color: #065f46; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpp-red { background: #fee2e2; color: #991b1b; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpp-slate { background: #e2e8f0; color: #334155; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpp-amber { background: #fef3c7; color: #92400e; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rpp-violet { background: #ede9fe; color: #5b21b6; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        .rp-kp { color: #6d28d9; font-weight: 700; font-size: 7px; margin-top: 2px; }
+        .rp-topics { margin-top: 2px; }
+        .rp-topic-tag {
+          background: #f1f5f9; border-radius: 3px; padding: 0 3px;
+          font-size: 6.5px; color: #475569; margin-left: 2px; display: inline-block;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+        }
+        .rp-footer {
+          margin-top: 4mm; padding-top: 2mm; border-top: 1px solid #d3d8e0;
+          font-size: 7px; color: #64748b; display: flex; justify-content: space-between;
+        }
+        .rp-report-hero {
+          background: linear-gradient(135deg, #4338ca 0%, #7c3aed 55%, #a855f7 100%);
+          color: #fff; border-radius: 6px; padding: 6px 10px;
+          display: flex; justify-content: space-between; align-items: center; margin-bottom: 4mm;
+          -webkit-print-color-adjust: exact; print-color-adjust: exact;
+          break-inside: avoid; page-break-inside: avoid;
+        }
+      `;
+
+      const doc = printWin.document;
+      doc.open();
+      doc.write(`<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>${title}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v33.003/Vazirmatn-font-face.css">
+  <style>${css}</style>
+</head>
+<body>${html}
+<script>
+(function () {
+  var printed = false;
+  function firePrint() {
+    if (printed) return;
+    printed = true;
+    try { window.focus(); window.print(); } catch (e) {}
+  }
+  function waitAndPrint() {
+    var p = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    p.then(function () {
+      requestAnimationFrame(function () {
+        requestAnimationFrame(function () {
+          setTimeout(firePrint, 400);
+        });
+      });
+    });
+  }
+  if (document.readyState === 'complete') waitAndPrint();
+  else window.addEventListener('load', waitAndPrint);
+
+  window.addEventListener('afterprint', function () {
+    setTimeout(function () { try { window.close(); } catch (e) {} }, 500);
+  });
+})();
+<\/script>
+</body>
+</html>`);
+      doc.close();
+    }
+
+    function openReportModal() {
+      document.getElementById("modalRoot").innerHTML = `
+        <div class="modal-backdrop" id="repModal">
+          <div class="modal-box">
+            <div class="modal-title"><i class="fas fa-file-pdf"></i> دانلود PDF پیام‌ها و تصمیم‌های تحلیل</div>
+            <div class="modal-field">
+              <label>دامنه گزارش</label>
+              <label class="radio-line"><input type="radio" name="repScope" value="current" checked> فقط استاد انتخاب‌شده (${(professors.find(p => p.id === state.profId) || {}).name || "-"})</label>
+              <label class="radio-line"><input type="radio" name="repScope" value="all"> همهٔ اساتید (هر استاد یک بخش)</label>
+            </div>
+            <div class="modal-field">
+              <label>فیلتر محتوا</label>
+              <label class="check-line"><input type="checkbox" id="repOnlyOpinions"> فقط پیام‌های دارای نظر</label>
+              <label class="check-line"><input type="checkbox" id="repIncludeNoAnalysis" checked> شامل پیام‌های بدون تحلیل (ردشده)</label>
+              <label class="check-line"><input type="checkbox" id="repWithChain" checked> نمایش زنجیرهٔ پاسخ ریپلای‌ها</label>
+            </div>
+            <div id="repProgress" style="font-size:.8rem;color:#64748b;min-height:1.4rem;"></div>
+            <div class="modal-actions">
+              <button class="btn-x btn-outline-x" id="repCancel">انصراف</button>
+              <button class="btn-x btn-primary-x" id="repGo"><i class="fas fa-print"></i> ساخت و چاپ</button>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById("repCancel").addEventListener("click", () => {
+        document.getElementById("modalRoot").innerHTML = "";
+      });
+      document.getElementById("repGo").addEventListener("click", buildReport);
+    }
+
+    function profSection(prof, rows, opts) {
+      let list = rows;
+      if (opts.onlyOpinions) list = list.filter(r => r.analysis && r.analysis.contains_opinion);
+      if (!opts.includeNoAnalysis) list = list.filter(r => r.analysis);
+      const opinions = rows.filter(r => r.analysis && r.analysis.contains_opinion);
+      const pos = opinions.filter(r => r.analysis.sentiment === "positive").length;
+      const neg = opinions.filter(r => r.analysis.sentiment === "negative").length;
+      const faNow = new Date().toLocaleDateString("fa-IR", { year: "numeric", month: "long", day: "numeric" });
+      return `
+      <div class="rp-prof-section">
+        <div class="rp-prof-header">
+          <div>
+            <div class="rp-prof-name">${prof.name}</div>
+            <div class="rp-prof-dept">${prof.department || "بدون دپارتمان"}</div>
+          </div>
+          <div class="rp-prof-stats">
+            ${faNumber.format(rows.length)} پیام | ${faNumber.format(opinions.length)} نظر |
+            مثبت: ${faNumber.format(pos)} | منفی: ${faNumber.format(neg)} | ${faNow}
+          </div>
+        </div>
+        ${list.length ? `
+        <table class="rp-table">
+          <thead>
+            <tr>
+              <th style="width:50px;">تاریخ</th>
+              <th style="width:40px;">روش</th>
+              <th style="width:30px;">واکنش</th>
+              <th>متن پیام و زنجیره</th>
+              <th style="width:140px;">تصمیم سیستم</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${list.map(r => `
+              <tr>
+                <td style="white-space:nowrap;font-size:7px;">${r.date || "-"}</td>
+                <td style="font-size:7px;">${METHOD_FA[r.match_method] || r.match_method}</td>
+                <td style="text-align:center;font-size:7px;">${r.reactions ? faNumber.format(Object.values(r.reactions).reduce((a, b) => a + b, 0)) : "-"}</td>
+                <td>
+                  ${opts.withChain ? chainHtml(r, true) : ""}
+                  <div class="rp-msg-text">${r.text}</div>
+                </td>
+                <td>${decisionHtml(r, true)}</td>
+              </tr>`).join("")}
+          </tbody>
+        </table>` : `<div style="font-size:8px;color:#64748b;padding:2mm 0;">پیامی با این فیلترها برای این استاد نیست.</div>`}
+        <div class="rp-footer">
+          <span>استادسنج — سامانه تحلیل نظرات دانشجویان</span>
+          <span>پایان گزارش ${prof.name}</span>
+        </div>
+      </div>`;
+    }
+
+    async function buildReport() {
+      const scope = document.querySelector('input[name="repScope"]:checked').value;
+      const opts = {
+        only_opinions: document.getElementById("repOnlyOpinions").checked,
+        include_no_analysis: document.getElementById("repIncludeNoAnalysis").checked,
+        with_chain: document.getElementById("repWithChain").checked
+      };
+      
+      const progress = document.getElementById("repProgress");
+      const goBtn = document.getElementById("repGo");
+      goBtn.disabled = true;
+      progress.textContent = "در حال ساخت فایل PDF در سرور (لطفاً صبر کنید)...";
+
+      try {
+        const response = await fetch(`${API_BASE}/api/messages/report-pdf`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scope: scope,
+            only_opinions: opts.only_opinions,
+            include_no_analysis: opts.include_no_analysis,
+            with_chain: opts.with_chain
+          })
+        });
+
+        if (!response.ok) throw new Error("خطا در ارتباط با سرور");
+
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.style.display = "none";
+        a.href = url;
+        
+        const scopeName = scope === "current" ? (professors.find(p => p.id === state.profId)?.name || "استاد") : "همه-اساتید";
+        const now = new Date();
+        const dateStr = now.toLocaleDateString("fa-IR-u-nu-latn", { year: "numeric", month: "2-digit", day: "2-digit" }).replace(/\//g, "-");
+        a.download = `استادسنج-گزارش-پیامها-${scopeName}-${dateStr}.pdf`;
+        
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+        
+        document.getElementById("modalRoot").innerHTML = "";
+        ui.showAlert("فایل PDF با موفقیت دانلود شد.", "success");
+      } catch (e) {
+        ui.showAlert("خطا در ساخت گزارش: " + e.message, "danger");
+      }
+      
+      goBtn.disabled = false;
+      progress.textContent = "";
+    }
+
+    ddProf = createDropdown("ddProfMount", {
+      items: () => professors.map(p => ({ value: p.id, label: p.name, sub: p.department || "بدون دپارتمان" })),
+      value: () => state.profId,
+      onChange: (v) => { state.profId = parseInt(v); loadReport(); }
+    });
+    ddMethod = createDropdown("ddMethodMount", {
+      items: () => METHOD_ITEMS,
+      value: () => state.method,
+      onChange: (v) => { state.method = v; state.page = 1; renderTable(); }
+    });
+    ddRevProf = createDropdown("ddRevProfMount", {
+      items: () => {
+        const counts = {};
+        REVIEW.items.forEach(r => { counts[r.professor_id] = (counts[r.professor_id] || 0) + 1; });
+        const list = [{ value: "all", label: `همهٔ اساتید (${faNumber.format(REVIEW.items.length)})` }];
+        Object.entries(counts).forEach(([pid, n]) => {
+          const p = professors.find(x => x.id === parseInt(pid));
+          list.push({ value: pid, label: `${p ? p.name : pid} (${faNumber.format(n)})` });
+        });
+        return list;
+      },
+      value: () => REVIEW.filterProf,
+      onChange: (v) => { REVIEW.filterProf = v; renderReview(); }
+    });
+
+    document.getElementById("tabBtnList").addEventListener("click", () => switchTab("list"));
+    document.getElementById("tabBtnReview").addEventListener("click", () => switchTab("review"));
+    document.getElementById("revJump").addEventListener("click", () => switchTab("review"));
+    document.getElementById("prevBtn").addEventListener("click", () => { state.page--; renderTable(); });
+    document.getElementById("nextBtn").addEventListener("click", () => { state.page++; renderTable(); });
+    document.getElementById("reportBtn").addEventListener("click", openReportModal);
+    document.getElementById("revApproveBtn").addEventListener("click", () => bulkReview(true));
+    document.getElementById("revRejectBtn").addEventListener("click", () => bulkReview(false));
+
+    loadProfessors();
+    loadPending();
+  </script>
+</body>
+</html>
